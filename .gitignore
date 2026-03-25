@@ -1,0 +1,31 @@
+﻿# Java
+target/
+*.class
+*.jar
+*.war
+
+# Maven / Gradle
+.mvn/
+.gradle/
+build/
+
+# Spring Boot
+application-local.yml
+application-secret.yml
+
+# Node / React
+node_modules/
+dist/
+.env
+.env.local
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
