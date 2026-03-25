@@ -1,7 +1,7 @@
 package com.rsp.config;
 
-import com.rsp.auth.JwtFilter;
-import com.rsp.user.UserRepository;
+import com.rsp.backend.auth.JwtFilter;
+import com.rsp.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

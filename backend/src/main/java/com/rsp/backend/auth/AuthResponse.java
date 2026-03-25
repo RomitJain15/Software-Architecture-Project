@@ -1,8 +1,8 @@
-package com.rsp.auth;
+package com.rsp.backend.auth;
 
 public record AuthResponse(
         String token,
-        String userId,
+        Long userId,
         String name,
         String email
 ) {}

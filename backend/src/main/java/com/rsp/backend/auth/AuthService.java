@@ -1,8 +1,10 @@
-package com.rsp.auth;
+package com.rsp.backend.auth;
 
-import com.rsp.user.*;
+import com.rsp.backend.model.User;
+import com.rsp.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,18 +22,18 @@ public class AuthService {
             throw new RuntimeException("Email already registered");
         }
         var user = User.builder()
-                .name(request.name())
+                .fullName(request.name())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .build();
         userRepository.save(user);
-        return new AuthResponse(jwtService.generateToken(user), user.getId(), user.getName(), user.getEmail());
+        return new AuthResponse(jwtService.generateToken(user), user.getId(), user.getFullName(), user.getEmail());
     }
 
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password()));
         var user = userRepository.findByEmail(request.email()).orElseThrow();
-        return new AuthResponse(jwtService.generateToken(user), user.getId(), user.getName(), user.getEmail());
+        return new AuthResponse(jwtService.generateToken(user), user.getId(), user.getFullName(), user.getEmail());
     }
 }
