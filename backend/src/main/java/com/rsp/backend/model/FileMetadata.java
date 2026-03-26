@@ -1,3 +1,5 @@
+package com.rsp.backend.model;
+
 @Entity
 @Table(name = "files")
 @Data @NoArgsConstructor @AllArgsConstructor @Builder

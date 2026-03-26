@@ -1,3 +1,5 @@
+package com.rsp.backend.model;
+
 @Entity
 @Table(name = "enrollments",
        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id","course_id"}))

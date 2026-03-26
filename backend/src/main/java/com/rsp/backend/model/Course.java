@@ -1,3 +1,5 @@
+package com.rsp.backend.model;
+
 @Entity
 @Table(name = "courses")
 @Data @NoArgsConstructor @AllArgsConstructor @Builder

@@ -1,4 +1,4 @@
-package com.rsp.config;
+package com.rsp.backend.config;
 
 import com.rsp.backend.auth.JwtFilter;
 import com.rsp.backend.repository.UserRepository;

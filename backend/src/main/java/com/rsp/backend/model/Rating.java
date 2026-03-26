@@ -1,3 +1,5 @@
+package com.rsp.backend.model;
+
 @Entity
 @Table(name = "ratings",
        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id","file_id"}))
