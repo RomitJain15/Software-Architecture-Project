@@ -1,5 +1,6 @@
 package com.rsp.backend.auth;
 
+import com.rsp.backend.exception.EmailAlreadyRegisteredException;
 import com.rsp.backend.model.User;
 import com.rsp.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.email()).isPresent()) {
-            throw new RuntimeException("Email already registered");
+            throw new EmailAlreadyRegisteredException("Email already registered");
         }
         var user = User.builder()
                 .fullName(request.name())

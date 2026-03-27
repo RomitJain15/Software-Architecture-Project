@@ -1,6 +1,7 @@
 package com.rsp.backend.auth;
 
 import com.rsp.backend.repository.UserRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,17 +35,21 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         String token = header.substring(7);
-        String email = jwtService.extractEmail(token);
+        try {
+            String email = jwtService.extractEmail(token);
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            userRepository.findByEmail(email).ifPresent(user -> {
-                if (jwtService.isValid(token, user)) {
-                    var auth = new UsernamePasswordAuthenticationToken(
-                            user, null, user.getAuthorities());
-                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                }
-            });
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                userRepository.findByEmail(email).ifPresent(user -> {
+                    if (jwtService.isValid(token, user)) {
+                        var auth = new UsernamePasswordAuthenticationToken(
+                                user, null, user.getAuthorities());
+                        auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    }
+                });
+            }
+        } catch (JwtException ignored) {
+            SecurityContextHolder.clearContext();
         }
         chain.doFilter(request, response);
     }
