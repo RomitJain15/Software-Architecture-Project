@@ -7,6 +7,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -71,6 +72,24 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(status).body(response);
     }
+
+        @ExceptionHandler(ResponseStatusException.class)
+        public ResponseEntity<ApiErrorResponse> handleResponseStatus(
+                        ResponseStatusException ex,
+                        HttpServletRequest request) {
+
+                var status = HttpStatus.valueOf(ex.getStatusCode().value());
+                var response = new ApiErrorResponse(
+                                Instant.now(),
+                                status.value(),
+                                status.getReasonPhrase(),
+                                ex.getReason() != null ? ex.getReason() : status.getReasonPhrase(),
+                                request.getRequestURI(),
+                                null
+                );
+
+                return ResponseEntity.status(status).body(response);
+        }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGenericException(
