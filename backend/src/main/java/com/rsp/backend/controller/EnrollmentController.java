@@ -50,9 +50,10 @@ public class EnrollmentController {
     }
 
     @DeleteMapping("/{id}")
-        @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteEnrollment(@PathVariable Long id) {
-        enrollmentService.deleteEnrollment(id);
+    public ResponseEntity<Void> deleteEnrollment(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable Long id) {
+        enrollmentService.deleteEnrollment(currentUser, id);
         return ResponseEntity.noContent().build();
     }
 

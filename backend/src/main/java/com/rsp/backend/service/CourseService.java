@@ -17,6 +17,13 @@ public class CourseService {
     private final CourseRepository courseRepository;
 
     public Course createCourse(Course course) {
+        if (courseRepository.existsByNameIgnoreCase(course.getName())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Course name already exists");
+        }
+        if (course.getCourseCode() != null &&
+                courseRepository.existsByCourseCodeIgnoreCase(course.getCourseCode())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Course code already exists");
+        }
         return courseRepository.save(course);
     }
 
@@ -32,6 +39,16 @@ public class CourseService {
     @Transactional
     public Course updateCourse(Long id, Course updated) {
         var course = getCourse(id);
+
+        if (updated.getName() != null &&
+                courseRepository.existsByNameIgnoreCaseAndIdNot(updated.getName(), id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Course name already exists");
+        }
+        if (updated.getCourseCode() != null &&
+                courseRepository.existsByCourseCodeIgnoreCaseAndIdNot(updated.getCourseCode(), id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Course code already exists");
+        }
+
         course.setName(updated.getName());
         course.setDescription(updated.getDescription());
         course.setCourseCode(updated.getCourseCode());

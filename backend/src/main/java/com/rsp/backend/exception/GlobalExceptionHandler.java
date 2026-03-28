@@ -1,9 +1,12 @@
 package com.rsp.backend.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -55,6 +58,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(response);
     }
 
+        @ExceptionHandler(DataIntegrityViolationException.class)
+        public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(
+                        DataIntegrityViolationException ex,
+                        HttpServletRequest request) {
+
+                var status = HttpStatus.CONFLICT;
+                var response = new ApiErrorResponse(
+                                Instant.now(),
+                                status.value(),
+                                status.getReasonPhrase(),
+                                "Duplicate or invalid data",
+                                request.getRequestURI(),
+                                null
+                );
+
+                return ResponseEntity.status(status).body(response);
+        }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiErrorResponse> handleBadCredentials(
             BadCredentialsException ex,
@@ -72,6 +93,42 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(status).body(response);
     }
+
+        @ExceptionHandler(AccessDeniedException.class)
+        public ResponseEntity<ApiErrorResponse> handleAccessDenied(
+                        AccessDeniedException ex,
+                        HttpServletRequest request) {
+
+                var status = HttpStatus.FORBIDDEN;
+                var response = new ApiErrorResponse(
+                                Instant.now(),
+                                status.value(),
+                                status.getReasonPhrase(),
+                                "Access denied",
+                                request.getRequestURI(),
+                                null
+                );
+
+                return ResponseEntity.status(status).body(response);
+        }
+
+        @ExceptionHandler(AuthenticationException.class)
+        public ResponseEntity<ApiErrorResponse> handleAuthenticationException(
+                        AuthenticationException ex,
+                        HttpServletRequest request) {
+
+                var status = HttpStatus.UNAUTHORIZED;
+                var response = new ApiErrorResponse(
+                                Instant.now(),
+                                status.value(),
+                                status.getReasonPhrase(),
+                                "Unauthorized",
+                                request.getRequestURI(),
+                                null
+                );
+
+                return ResponseEntity.status(status).body(response);
+        }
 
         @ExceptionHandler(ResponseStatusException.class)
         public ResponseEntity<ApiErrorResponse> handleResponseStatus(

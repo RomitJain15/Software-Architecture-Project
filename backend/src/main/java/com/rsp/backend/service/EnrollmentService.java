@@ -82,11 +82,19 @@ public class EnrollmentService {
         return enrollmentRepository.findAll();
     }
 
-    public void deleteEnrollment(Long id) {
-        if (!enrollmentRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Enrollment not found");
+    public void deleteEnrollment(User currentUser, Long id) {
+        if (currentUser == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
         }
-        enrollmentRepository.deleteById(id);
+
+        Enrollment enrollment = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Enrollment not found"));
+
+        if (!isAdmin(currentUser) && !enrollment.getUser().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        enrollmentRepository.delete(enrollment);
     }
 
     private boolean isAdmin(User currentUser) {
