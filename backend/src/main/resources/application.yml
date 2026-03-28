@@ -16,3 +16,12 @@ management:
     web:
       exposure:
         include: health,info,prometheus
+
+app:
+  admin:
+    seed:
+      enabled: true
+      reset-users: false
+      email: admin@example.com
+      password: admin123
+      name: Admin

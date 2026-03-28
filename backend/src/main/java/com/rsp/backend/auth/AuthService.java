@@ -1,6 +1,7 @@
 package com.rsp.backend.auth;
 
 import com.rsp.backend.exception.EmailAlreadyRegisteredException;
+import com.rsp.backend.model.Role;
 import com.rsp.backend.model.User;
 import com.rsp.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class AuthService {
                 .fullName(request.name())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
+            .role(Role.STUDENT)
                 .build();
         userRepository.save(user);
         return new AuthResponse(jwtService.generateToken(user), user.getId(), user.getFullName(), user.getEmail());
