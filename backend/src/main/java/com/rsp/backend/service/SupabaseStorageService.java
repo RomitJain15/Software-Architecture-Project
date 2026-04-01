@@ -70,5 +70,26 @@ public class SupabaseStorageService {
         return new SupabaseUploadResult(objectPath, publicUrl);
     }
 
+    public void delete(String objectPath) {
+        if (objectPath == null || objectPath.isBlank()) {
+            return;
+        }
+
+        String deleteUrl = supabaseUrl + "/storage/v1/object/" + bucket + "/" + objectPath;
+
+        webClientBuilder.build()
+                .delete()
+                .uri(deleteUrl)
+                .header("Authorization", "Bearer " + supabaseServiceKey)
+                .retrieve()
+                .onStatus(status -> !status.is2xxSuccessful(), response ->
+                        response.bodyToMono(String.class)
+                                .map(body -> new ResponseStatusException(
+                                        HttpStatus.BAD_GATEWAY,
+                                        "Supabase delete failed: " + body)))
+                .toBodilessEntity()
+                .block();
+    }
+
     public record SupabaseUploadResult(String objectPath, String publicUrl) {}
 }

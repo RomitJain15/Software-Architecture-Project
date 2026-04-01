@@ -28,6 +28,7 @@ public class FileMetadata {
     private String fileUrl;
     private String fileType;
     private Long fileSize;
+    private String objectPath;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)

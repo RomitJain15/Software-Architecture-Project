@@ -14,12 +14,13 @@ public class FileMetadataService {
 
     private final FileMetadataRepository fileMetadataRepository;
 
-    public FileMetadata saveMetadata(MultipartFile file, Course course, User uploader, String publicUrl) {
+    public FileMetadata saveMetadata(MultipartFile file, Course course, User uploader, String publicUrl, String objectPath) {
         FileMetadata metadata = FileMetadata.builder()
                 .fileName(file.getOriginalFilename())
                 .fileUrl(publicUrl)
                 .fileType(file.getContentType())
                 .fileSize(file.getSize())
+                .objectPath(objectPath)
                 .course(course)
                 .uploadedBy(uploader)
                 .build();
