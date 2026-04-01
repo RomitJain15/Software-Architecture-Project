@@ -5,6 +5,7 @@ import com.rsp.backend.model.FileMetadata;
 import com.rsp.backend.model.Role;
 import com.rsp.backend.model.User;
 import com.rsp.backend.repository.CourseRepository;
+import com.rsp.backend.repository.EnrollmentRepository;
 import com.rsp.backend.repository.FileMetadataRepository;
 import com.rsp.backend.service.FileMetadataService;
 import com.rsp.backend.service.SupabaseStorageService;
@@ -27,6 +28,7 @@ public class FileController {
     private final FileMetadataService fileMetadataService;
     private final CourseRepository courseRepository;
     private final FileMetadataRepository fileMetadataRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FileMetadataResponse> uploadFile(
@@ -40,6 +42,11 @@ public class FileController {
 
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found"));
+
+        boolean isAdmin = currentUser.getRole() == Role.ADMIN;
+        if (!isAdmin && !enrollmentRepository.existsByUserIdAndCourseId(currentUser.getId(), courseId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Enrollment required to upload");
+        }
 
         String folderPath = "courses/" + courseId + "/users/" + currentUser.getId();
         SupabaseStorageService.SupabaseUploadResult result = supabaseStorageService.upload(file, folderPath);
