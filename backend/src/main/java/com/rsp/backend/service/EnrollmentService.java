@@ -5,6 +5,7 @@ import com.rsp.backend.model.Enrollment;
 import com.rsp.backend.model.Role;
 import com.rsp.backend.model.User;
 import com.rsp.backend.controller.CoursePresenceBroadcaster;
+import com.rsp.backend.presence.CoursePresenceRegistry;
 import com.rsp.backend.repository.CourseRepository;
 import com.rsp.backend.repository.EnrollmentRepository;
 import com.rsp.backend.repository.UserRepository;
@@ -23,6 +24,7 @@ public class EnrollmentService {
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
     private final CoursePresenceBroadcaster coursePresenceBroadcaster;
+    private final CoursePresenceRegistry coursePresenceRegistry;
 
     public Enrollment enroll(User currentUser, Long requestedUserId, Long courseId) {
         if (currentUser == null) {
@@ -99,7 +101,9 @@ public class EnrollmentService {
         }
 
         Long courseId = enrollment.getCourse().getId();
+        Long userId = enrollment.getUser().getId();
         enrollmentRepository.delete(enrollment);
+        coursePresenceRegistry.markOffline(courseId, userId);
         coursePresenceBroadcaster.broadcastCoursePresence(courseId);
     }
 

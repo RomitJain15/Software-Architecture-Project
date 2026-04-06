@@ -33,6 +33,48 @@ export const courseService = {
     }
   },
 
+  // Admin: list all users
+  getAllUsers: async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/admin/users`, {
+        headers: getAuthHeaders(),
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw error;
+    }
+  },
+
+  // Admin: list enrollments for a course
+  getEnrollmentsByCourse: async (courseId) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/enrollments`, {
+        headers: getAuthHeaders(),
+        params: { courseId },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching enrollments by course:', error);
+      throw error;
+    }
+  },
+
+  // Admin: enroll a specific user in a course
+  enrollUserInCourse: async (courseId, userId) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/enrollments`,
+        { courseId, userId },
+        { headers: getAuthHeaders() }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error enrolling user in course:', error);
+      throw error;
+    }
+  },
+
   // Create a new course (admin)
   createCourse: async (course) => {
     try {

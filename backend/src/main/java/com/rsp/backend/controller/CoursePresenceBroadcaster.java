@@ -1,17 +1,15 @@
 package com.rsp.backend.controller;
 
-import com.rsp.backend.auth.AuthSessionService;
 import com.rsp.backend.model.Enrollment;
-import com.rsp.backend.model.Role;
 import com.rsp.backend.model.User;
 import com.rsp.backend.repository.EnrollmentRepository;
 import com.rsp.backend.repository.UserRepository;
+import com.rsp.backend.presence.CoursePresenceRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,8 +20,8 @@ public class CoursePresenceBroadcaster {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final EnrollmentRepository enrollmentRepository;
-    private final AuthSessionService authSessionService;
     private final UserRepository userRepository;
+    private final CoursePresenceRegistry coursePresenceRegistry;
 
         @Transactional(readOnly = true)
     public void broadcastForUser(Long userId) {
@@ -41,8 +39,7 @@ public class CoursePresenceBroadcaster {
                 .map(User::getId)
                 .collect(Collectors.toSet());
 
-        Set<Long> activeUserIds = authSessionService.findActiveUserIds(Instant.now()).stream()
-                .collect(Collectors.toSet());
+        Set<Long> activeUserIds = coursePresenceRegistry.getOnlineUserIds(courseId);
 
         List<PresenceController.OnlineUserResponse> payload = userRepository.findAllById(enrolledUserIds).stream()
                 .filter(user -> activeUserIds.contains(user.getId()))

@@ -39,8 +39,10 @@ html, body {
 }
 
 .app-shell.admin-theme {
-  --accent: #b45309;
-  --accent-strong: #7c2d12;
+  --accent: #b85c38;
+  --accent-strong: #6f3b2b;
+  --bg: #f4f3f1;
+  --line: #e2ded7;
 }
 
 .app-shell::before {
@@ -135,6 +137,45 @@ html, body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
+}
+
+.student-dashboard-layout {
+  width: 100%;
+}
+
+.student-dashboard-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 24px;
+  align-items: start;
+}
+
+.student-dashboard-sidebar {
+  position: sticky;
+  top: 24px;
+}
+
+.student-progress-card {
+  padding: 22px;
+}
+
+.student-progress-card h3 {
+  margin: 0 0 14px;
+  font-size: 18px;
+}
+
+.courses-section-tight {
+  margin-top: 20px;
+}
+
+@media (max-width: 980px) {
+  .student-dashboard-main {
+    grid-template-columns: 1fr;
+  }
+
+  .student-dashboard-sidebar {
+    position: static;
+  }
 }
 
 .card {
@@ -241,6 +282,42 @@ html, body {
 .info-list {
   display: grid;
   gap: 18px;
+}
+
+.course-admin-actions {
+  display: grid;
+  gap: 16px;
+}
+
+.course-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.course-admin-panel {
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  background: #faf9f6;
+  display: grid;
+  gap: 12px;
+}
+
+.course-admin-panel h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.admin-select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-size: 14px;
+  color: var(--ink);
 }
 
 .stat-item {

@@ -4,6 +4,7 @@ import com.rsp.backend.exception.EmailAlreadyRegisteredException;
 import com.rsp.backend.model.Role;
 import com.rsp.backend.model.User;
 import com.rsp.backend.controller.CoursePresenceBroadcaster;
+import com.rsp.backend.presence.CoursePresenceRegistry;
 import com.rsp.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +26,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthSessionService authSessionService;
     private final CoursePresenceBroadcaster coursePresenceBroadcaster;
+    private final CoursePresenceRegistry coursePresenceRegistry;
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse register(RegisterRequest request) {
@@ -44,7 +46,6 @@ public class AuthService {
                 issuedAt,
                 issuedAt.plusMillis(jwtService.getExpiration())
             );
-            broadcastPresenceFor(user);
         return new AuthResponse(
             jwtService.generateToken(user, session.getSessionId()),
                 new UserSummary(user.getId(), user.getFullName(), user.getEmail(), user.getRole(), user.getCreatedAt())
@@ -61,15 +62,10 @@ public class AuthService {
                 issuedAt,
                 issuedAt.plusMillis(jwtService.getExpiration())
             );
-            broadcastPresenceFor(user);
         return new AuthResponse(
                 jwtService.generateToken(user, session.getSessionId()),
                 new UserSummary(user.getId(), user.getFullName(), user.getEmail(), user.getRole(), user.getCreatedAt())
         );
-    }
-
-    private void broadcastPresenceFor(User user) {
-        coursePresenceBroadcaster.broadcastForUser(user.getId());
     }
 
     public void logout(String authHeader) {
@@ -82,7 +78,10 @@ public class AuthService {
             var sessionId = jwtService.extractSessionId(token);
             authSessionService.revokeSession(sessionId, Instant.now(), "LOGOUT");
             authSessionService.findUserBySessionId(sessionId)
-                    .ifPresent(user -> coursePresenceBroadcaster.broadcastForUser(user.getId()));
+                    .ifPresent(user -> {
+                        var affectedCourses = coursePresenceRegistry.removeUserFromAllCourses(user.getId());
+                        affectedCourses.forEach(coursePresenceBroadcaster::broadcastCoursePresence);
+                    });
         } catch (Exception ex) {
             throw new ResponseStatusException(BAD_REQUEST, "Invalid authorization token");
         }

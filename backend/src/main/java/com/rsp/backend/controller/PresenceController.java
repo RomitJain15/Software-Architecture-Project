@@ -1,9 +1,9 @@
 package com.rsp.backend.controller;
 
-import com.rsp.backend.auth.AuthSessionService;
 import com.rsp.backend.model.Enrollment;
 import com.rsp.backend.model.Role;
 import com.rsp.backend.model.User;
+import com.rsp.backend.presence.CoursePresenceRegistry;
 import com.rsp.backend.repository.EnrollmentRepository;
 import com.rsp.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,8 +26,8 @@ import java.util.stream.Collectors;
 public class PresenceController {
 
     private final EnrollmentRepository enrollmentRepository;
-    private final AuthSessionService authSessionService;
     private final UserRepository userRepository;
+    private final CoursePresenceRegistry coursePresenceRegistry;
 
     @GetMapping("/{courseId}/online-users")
     public ResponseEntity<List<OnlineUserResponse>> listOnlineUsers(
@@ -49,8 +48,7 @@ public class PresenceController {
                 .map(User::getId)
                 .collect(Collectors.toSet());
 
-        Set<Long> activeUserIds = authSessionService.findActiveUserIds(Instant.now()).stream()
-                .collect(Collectors.toSet());
+        Set<Long> activeUserIds = coursePresenceRegistry.getOnlineUserIds(courseId);
 
         List<OnlineUserResponse> results = userRepository.findAllById(enrolledUserIds).stream()
                 .filter(user -> activeUserIds.contains(user.getId()))

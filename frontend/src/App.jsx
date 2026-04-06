@@ -69,93 +69,78 @@ function Dashboard({
         </header>
 
         <main className="dashboard-content">
-          <section className="dashboard-grid">
-              {isAdmin ? (
-                <section className="card info-card">
-                  <h3>🛠 Admin Tools</h3>
-                  <div className="info-list">
-                    <div className="stat-item">
-                      <p className="info-label">Courses</p>
-                      <p className="info-value">{courses.length}</p>
-                    </div>
+          {isAdmin ? (
+            <section className="dashboard-grid">
+              <section className="card info-card">
+                <h3>🛠 Admin Tools</h3>
+                <div className="info-list">
+                  <div className="stat-item">
+                    <p className="info-label">Courses</p>
+                    <p className="info-value">{courses.length}</p>
                   </div>
-                  <form className="admin-form" onSubmit={handleSaveCourse}>
-                    <div className="admin-form-row">
-                      <label htmlFor="courseName">Course Name</label>
-                      <input
-                        id="courseName"
-                        name="name"
-                        type="text"
-                        value={courseForm.name}
-                        onChange={handleCourseFormChange}
-                        placeholder="Intro to Architecture"
-                        required
-                      />
-                    </div>
-                    <div className="admin-form-row">
-                      <label htmlFor="courseCode">Course Code</label>
-                      <input
-                        id="courseCode"
-                        name="courseCode"
-                        type="text"
-                        value={courseForm.courseCode}
-                        onChange={handleCourseFormChange}
-                        placeholder="SWE-301"
-                        required
-                      />
-                    </div>
-                    <div className="admin-form-row">
-                      <label htmlFor="courseDescription">Description</label>
-                      <textarea
-                        id="courseDescription"
-                        name="description"
-                        value={courseForm.description}
-                        onChange={handleCourseFormChange}
-                        placeholder="Short course summary"
-                        rows="3"
-                      />
-                    </div>
-                    {courseActionError && (
-                      <div className="admin-form-error">{courseActionError}</div>
-                    )}
-                    <div className="admin-form-actions">
-                      <button className="admin-btn" type="submit" disabled={courseActionLoading}>
-                        {courseActionLoading
-                          ? 'Saving...'
-                          : editingCourseId
-                            ? 'Update Course'
-                            : 'Create Course'}
-                      </button>
-                      <button
-                        className="admin-btn outline"
-                        type="button"
-                        onClick={resetCourseForm}
-                        disabled={courseActionLoading}
-                      >
-                        Clear
-                      </button>
-                    </div>
-                  </form>
-                </section>
-              ) : (
-                <section className="card info-card">
-                  <h3>📊 Your Progress</h3>
-                  <div className="info-list">
-                    <div className="stat-item">
-                      <p className="info-label">📌 Active Courses</p>
-                      <p className="info-value">{myEnrolledCourses.length}</p>
-                    </div>
-                    <div className="stat-item">
-                      <p className="info-label">🚀 To Explore</p>
-                      <p className="info-value">{availableCourses.length}</p>
-                    </div>
+                </div>
+                <form className="admin-form" onSubmit={handleSaveCourse}>
+                  <div className="admin-form-row">
+                    <label htmlFor="courseName">Course Name</label>
+                    <input
+                      id="courseName"
+                      name="name"
+                      type="text"
+                      value={courseForm.name}
+                      onChange={handleCourseFormChange}
+                      placeholder="Intro to Architecture"
+                      required
+                    />
                   </div>
-                </section>
-              )}
+                  <div className="admin-form-row">
+                    <label htmlFor="courseCode">Course Code</label>
+                    <input
+                      id="courseCode"
+                      name="courseCode"
+                      type="text"
+                      value={courseForm.courseCode}
+                      onChange={handleCourseFormChange}
+                      placeholder="SWE-301"
+                      required
+                    />
+                  </div>
+                  <div className="admin-form-row">
+                    <label htmlFor="courseDescription">Description</label>
+                    <textarea
+                      id="courseDescription"
+                      name="description"
+                      value={courseForm.description}
+                      onChange={handleCourseFormChange}
+                      placeholder="Short course summary"
+                      rows="3"
+                    />
+                  </div>
+                  {courseActionError && (
+                    <div className="admin-form-error">{courseActionError}</div>
+                  )}
+                  <div className="admin-form-actions">
+                    <button className="admin-btn" type="submit" disabled={courseActionLoading}>
+                      {courseActionLoading
+                        ? 'Saving...'
+                        : editingCourseId
+                          ? 'Update Course'
+                          : 'Create Course'}
+                    </button>
+                    <button
+                      className="admin-btn outline"
+                      type="button"
+                      onClick={resetCourseForm}
+                      disabled={courseActionLoading}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </form>
+              </section>
             </section>
-
-            {!isAdmin && (
-              <>
+          ) : (
+            <section className="student-dashboard-layout">
+              <div className="student-dashboard-main">
                 <section className="courses-section">
                   <div className="section-header">
                     <h2>📚 My Courses</h2>
@@ -205,44 +190,60 @@ function Dashboard({
                       <p>You haven't enrolled in any courses yet. Check the courses below!</p>
                     </div>
                   )}
+
+                  <section className="courses-section courses-section-tight">
+                    <div className="section-header">
+                      <h2>🌟 Enroll in Courses</h2>
+                      <p className="section-subtitle">Available courses you can enroll in</p>
+                    </div>
+                    {loadingCourses ? (
+                      <div className="loading">Loading courses...</div>
+                    ) : availableCourses.length > 0 ? (
+                      <div className="courses-grid">
+                        {availableCourses.map(course => (
+                          <div key={course.id} className="course-card">
+                            <div className="course-header">
+                              <h3>{course.name}</h3>
+                              <span className="course-code">{course.courseCode}</span>
+                            </div>
+                            <p className="course-description">{course.description || 'No description'}</p>
+                            <div className="course-footer">
+                              <button
+                                className="enroll-btn"
+                                onClick={() => handleEnroll(course.id)}
+                              >
+                                Enroll
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="empty-state">
+                        <p>You're enrolled in all available courses!</p>
+                      </div>
+                    )}
+                  </section>
                 </section>
 
-                <section className="courses-section">
-                  <div className="section-header">
-                    <h2>🌟 Enroll in Courses</h2>
-                    <p className="section-subtitle">Available courses you can enroll in</p>
-                  </div>
-                  {loadingCourses ? (
-                    <div className="loading">Loading courses...</div>
-                  ) : availableCourses.length > 0 ? (
-                    <div className="courses-grid">
-                      {availableCourses.map(course => (
-                        <div key={course.id} className="course-card">
-                          <div className="course-header">
-                            <h3>{course.name}</h3>
-                            <span className="course-code">{course.courseCode}</span>
-                          </div>
-                          <p className="course-description">{course.description || 'No description'}</p>
-                          <div className="course-footer">
-                            <Link to={`/courses/${course.id}`} className="admin-btn outline">Open</Link>
-                            <button
-                              className="enroll-btn"
-                              onClick={() => handleEnroll(course.id)}
-                            >
-                              Enroll
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                <aside className="student-dashboard-sidebar">
+                  <section className="card student-progress-card">
+                    <h3>📊 Your Progress</h3>
+                    <div className="info-list">
+                      <div className="stat-item">
+                        <p className="info-label">📌 Active Courses</p>
+                        <p className="info-value">{myEnrolledCourses.length}</p>
+                      </div>
+                      <div className="stat-item">
+                        <p className="info-label">🚀 To Explore</p>
+                        <p className="info-value">{availableCourses.length}</p>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="empty-state">
-                      <p>You're enrolled in all available courses!</p>
-                    </div>
-                  )}
-                </section>
-              </>
-            )}
+                  </section>
+                </aside>
+              </div>
+            </section>
+          )}
             {isAdmin && (
               <section className="courses-section">
                 <div className="section-header">
@@ -360,7 +361,7 @@ function ProfilePage({ isAdmin, userData, normalizedRole, onSignOut }) {
   );
 }
 
-function CoursePage({ isAdmin, userData, courses }) {
+function CoursePage({ isAdmin, userData, courses, enrollments }) {
   const { courseId } = useParams();
   const parsedCourseId = Number(courseId);
   const maxUploadSizeBytes = 25 * 1024 * 1024;
@@ -381,11 +382,25 @@ function CoursePage({ isAdmin, userData, courses }) {
   const [onlineUsersLoading, setOnlineUsersLoading] = useState(false);
   const stompClientRef = useRef(null);
   const dragDepthRef = useRef(0);
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [adminEnrollments, setAdminEnrollments] = useState([]);
+  const [adminRosterLoading, setAdminRosterLoading] = useState(false);
+  const [adminRosterError, setAdminRosterError] = useState('');
+  const [selectedEnrollUserId, setSelectedEnrollUserId] = useState('');
+  const [selectedUnenrollEnrollmentId, setSelectedUnenrollEnrollmentId] = useState('');
+  const [adminEnrollActionLoading, setAdminEnrollActionLoading] = useState(false);
+  const [adminEnrollActionError, setAdminEnrollActionError] = useState('');
 
   const course = useMemo(
     () => courses.find((item) => item.id === parsedCourseId),
     [courses, parsedCourseId]
   );
+
+  const isEnrolled = useMemo(
+    () => enrollments.some((enrollment) => enrollment.courseId === parsedCourseId),
+    [enrollments, parsedCourseId]
+  );
+  const shouldBlockAccess = !isAdmin && !isEnrolled;
 
   const loadCourseFiles = async (isMounted) => {
     if (!parsedCourseId) {
@@ -439,21 +454,74 @@ function CoursePage({ isAdmin, userData, courses }) {
   useEffect(() => {
     let isMounted = true;
 
+    if (shouldBlockAccess) {
+      return () => {
+        isMounted = false;
+      };
+    }
+
     loadCourseFiles(isMounted);
 
     return () => {
       isMounted = false;
     };
-  }, [parsedCourseId]);
+  }, [parsedCourseId, shouldBlockAccess]);
 
   useEffect(() => {
     let isMounted = true;
 
-    const loadOnlineUsers = async () => {
-      if (!parsedCourseId) {
-        return;
+    if (!isAdmin || !parsedCourseId) {
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    const loadAdminRoster = async () => {
+      if (isMounted) {
+        setAdminRosterLoading(true);
+        setAdminRosterError('');
       }
 
+      try {
+        const [users, enrollments] = await Promise.all([
+          courseService.getAllUsers(),
+          courseService.getEnrollmentsByCourse(parsedCourseId),
+        ]);
+        if (!isMounted) {
+          return;
+        }
+        setAdminUsers(users);
+        setAdminEnrollments(enrollments);
+      } catch (err) {
+        if (isMounted) {
+          setAdminRosterError(err.response?.data?.message || 'Failed to load enrollment roster.');
+          setAdminUsers([]);
+          setAdminEnrollments([]);
+        }
+      } finally {
+        if (isMounted) {
+          setAdminRosterLoading(false);
+        }
+      }
+    };
+
+    loadAdminRoster();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isAdmin, parsedCourseId]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!parsedCourseId || !userData?.id || shouldBlockAccess) {
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    const loadOnlineUsers = async () => {
       if (isMounted) {
         setOnlineUsersLoading(true);
       }
@@ -485,6 +553,11 @@ function CoursePage({ isAdmin, userData, courses }) {
           return;
         }
 
+        client.publish({
+          destination: `/app/courses/${parsedCourseId}/presence/join`,
+          body: JSON.stringify({ userId: userData.id }),
+        });
+
         client.subscribe(`/topic/courses/${parsedCourseId}/online-users`, (message) => {
           if (!isMounted) {
             return;
@@ -506,11 +579,47 @@ function CoursePage({ isAdmin, userData, courses }) {
     return () => {
       isMounted = false;
       if (stompClientRef.current) {
+        if (stompClientRef.current.connected) {
+          stompClientRef.current.publish({
+            destination: `/app/courses/${parsedCourseId}/presence/leave`,
+            body: JSON.stringify({ userId: userData.id }),
+          });
+        }
         stompClientRef.current.deactivate();
         stompClientRef.current = null;
       }
     };
-  }, [parsedCourseId]);
+  }, [parsedCourseId, userData?.id, shouldBlockAccess]);
+
+  if (shouldBlockAccess) {
+    return (
+      <div className="app">
+        <div className={`app-shell ${isAdmin ? 'admin-theme' : 'student-theme'}`}>
+          <header className="app-header">
+            <div className="brand">
+              <div className="brand-mark">
+                <span className="brand-icon">📚</span>
+              </div>
+              <div className="brand-text">
+                <p className="brand-eyebrow">Course Access</p>
+                <h1>Enrollment Required</h1>
+              </div>
+            </div>
+            <div className="header-actions">
+              <Link to="/" className="ghost-btn">Back to Dashboard</Link>
+            </div>
+          </header>
+          <main className="profile-page">
+            <section className="card">
+              <p className="section-subtitle">
+                You need to be enrolled in this course to access its workspace.
+              </p>
+            </section>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   const handleFileUpload = async (event) => {
     event.preventDefault();
@@ -666,6 +775,48 @@ function CoursePage({ isAdmin, userData, courses }) {
     }
   };
 
+  const handleAdminEnroll = async () => {
+    if (!selectedEnrollUserId) {
+      setAdminEnrollActionError('Select a student to enroll.');
+      return;
+    }
+
+    setAdminEnrollActionLoading(true);
+    setAdminEnrollActionError('');
+
+    try {
+      await courseService.enrollUserInCourse(parsedCourseId, Number(selectedEnrollUserId));
+      const enrollments = await courseService.getEnrollmentsByCourse(parsedCourseId);
+      setAdminEnrollments(enrollments);
+      setSelectedEnrollUserId('');
+    } catch (err) {
+      setAdminEnrollActionError(err.response?.data?.message || 'Failed to enroll student.');
+    } finally {
+      setAdminEnrollActionLoading(false);
+    }
+  };
+
+  const handleAdminUnenroll = async () => {
+    if (!selectedUnenrollEnrollmentId) {
+      setAdminEnrollActionError('Select an enrolled student to remove.');
+      return;
+    }
+
+    setAdminEnrollActionLoading(true);
+    setAdminEnrollActionError('');
+
+    try {
+      await courseService.unenrollCourse(Number(selectedUnenrollEnrollmentId));
+      const enrollments = await courseService.getEnrollmentsByCourse(parsedCourseId);
+      setAdminEnrollments(enrollments);
+      setSelectedUnenrollEnrollmentId('');
+    } catch (err) {
+      setAdminEnrollActionError(err.response?.data?.message || 'Failed to unenroll student.');
+    } finally {
+      setAdminEnrollActionLoading(false);
+    }
+  };
+
   return (
     <div className="app">
       <div className={`app-shell ${isAdmin ? 'admin-theme' : 'student-theme'}`}>
@@ -714,6 +865,78 @@ function CoursePage({ isAdmin, userData, courses }) {
                 </div>
               </div>
             </section>
+
+            {isAdmin && (
+              <section className="card course-admin-actions">
+                <div className="section-header section-header-inline">
+                  <div>
+                    <h3>Manage Enrollments</h3>
+                    <p className="section-subtitle">Enroll or remove students from this course.</p>
+                  </div>
+                </div>
+                {adminRosterError && <div className="admin-form-error">{adminRosterError}</div>}
+                <div className="course-admin-grid">
+                  <div className="course-admin-panel">
+                    <h4>Enroll Student</h4>
+                    <p className="section-subtitle">Add a student to this course.</p>
+                    <select
+                      className="admin-select"
+                      value={selectedEnrollUserId}
+                      onChange={(event) => setSelectedEnrollUserId(event.target.value)}
+                      disabled={adminRosterLoading || adminEnrollActionLoading}
+                    >
+                      <option value="">Select student</option>
+                      {adminUsers
+                        .filter((user) => user.role !== 'ADMIN')
+                        .filter((user) => !adminEnrollments.some((enrollment) => enrollment.userId === user.id))
+                        .map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.fullName} ({user.email})
+                          </option>
+                        ))}
+                    </select>
+                    <button
+                      className="admin-btn"
+                      type="button"
+                      onClick={handleAdminEnroll}
+                      disabled={adminRosterLoading || adminEnrollActionLoading}
+                    >
+                      {adminEnrollActionLoading ? 'Working...' : 'Enroll'}
+                    </button>
+                  </div>
+                  <div className="course-admin-panel">
+                    <h4>Unenroll Student</h4>
+                    <p className="section-subtitle">Remove a student from this course.</p>
+                    <select
+                      className="admin-select"
+                      value={selectedUnenrollEnrollmentId}
+                      onChange={(event) => setSelectedUnenrollEnrollmentId(event.target.value)}
+                      disabled={adminRosterLoading || adminEnrollActionLoading}
+                    >
+                      <option value="">Select enrolled student</option>
+                      {adminEnrollments.map((enrollment) => {
+                        const user = adminUsers.find((item) => item.id === enrollment.userId);
+                        const label = user ? `${user.fullName} (${user.email})` : `User #${enrollment.userId}`;
+                        return (
+                          <option key={enrollment.id} value={enrollment.id}>
+                            {label}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <button
+                      className="admin-btn"
+                      type="button"
+                      onClick={handleAdminUnenroll}
+                      disabled={adminRosterLoading || adminEnrollActionLoading}
+                    >
+                      {adminEnrollActionLoading ? 'Working...' : 'Unenroll'}
+                    </button>
+                  </div>
+                </div>
+                {adminEnrollActionError && <div className="admin-form-error">{adminEnrollActionError}</div>}
+              </section>
+            )}
 
             <form
               className={`upload-card ${isDraggingFile ? 'upload-card-dragging' : ''}`}
@@ -911,6 +1134,7 @@ function CoursePage({ isAdmin, userData, courses }) {
 
 function App() {
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const [userData, setUserData] = useState(null);
   const [courses, setCourses] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
@@ -937,6 +1161,7 @@ function App() {
         localStorage.removeItem('user');
       }
     }
+    setAuthChecked(true);
   }, []);
 
   // Fetch courses and enrollments when signed in
@@ -1075,6 +1300,10 @@ function App() {
   const normalizedRole = userData?.role ? userData.role.toUpperCase() : '';
   const isAdmin = normalizedRole === 'ADMIN' || normalizedRole === 'ROLE_ADMIN';
 
+  if (!authChecked) {
+    return null;
+  }
+
   return (
     <Router>
       <Routes>
@@ -1152,6 +1381,7 @@ function App() {
                   isAdmin={isAdmin}
                   userData={userData}
                   courses={courses}
+                  enrollments={enrollments}
                 />
               )}
             />
