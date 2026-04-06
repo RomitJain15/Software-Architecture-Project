@@ -95,10 +95,7 @@ public class FileController {
             String objectPath,
             Long courseId,
             Long uploadedBy,
-<<<<<<< HEAD
-=======
             String uploadedByName,
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
             String uploadedAt
     ) {
         public static FileMetadataResponse from(FileMetadata metadata) {
@@ -111,10 +108,7 @@ public class FileController {
                     metadata.getObjectPath(),
                     metadata.getCourse().getId(),
                     metadata.getUploadedBy().getId(),
-<<<<<<< HEAD
-=======
                     metadata.getUploadedBy().getFullName(),
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
                     metadata.getUploadedAt() != null ? metadata.getUploadedAt().toString() : null
             );
         }

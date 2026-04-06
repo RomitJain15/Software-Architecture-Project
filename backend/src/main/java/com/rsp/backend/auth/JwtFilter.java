@@ -14,20 +14,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-<<<<<<< HEAD
-=======
 import java.time.Instant;
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
 
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-<<<<<<< HEAD
-=======
     private final AuthSessionService authSessionService;
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
     private final UserRepository userRepository;
 
     @Override
@@ -45,14 +39,11 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = header.substring(7);
         try {
             String email = jwtService.extractEmail(token);
-<<<<<<< HEAD
-=======
             if (!authSessionService.isSessionActive(jwtService.extractSessionId(token), Instant.now())) {
                 SecurityContextHolder.clearContext();
                 chain.doFilter(request, response);
                 return;
             }
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 userRepository.findByEmail(email).ifPresent(user -> {

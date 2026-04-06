@@ -4,10 +4,7 @@ import com.rsp.backend.model.Course;
 import com.rsp.backend.model.Enrollment;
 import com.rsp.backend.model.Role;
 import com.rsp.backend.model.User;
-<<<<<<< HEAD
-=======
 import com.rsp.backend.controller.CoursePresenceBroadcaster;
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
 import com.rsp.backend.repository.CourseRepository;
 import com.rsp.backend.repository.EnrollmentRepository;
 import com.rsp.backend.repository.UserRepository;
@@ -25,10 +22,7 @@ public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
-<<<<<<< HEAD
-=======
     private final CoursePresenceBroadcaster coursePresenceBroadcaster;
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
 
     public Enrollment enroll(User currentUser, Long requestedUserId, Long courseId) {
         if (currentUser == null) {
@@ -52,13 +46,9 @@ public class EnrollmentService {
                 .course(course)
                 .build();
 
-<<<<<<< HEAD
-        return enrollmentRepository.save(enrollment);
-=======
         Enrollment savedEnrollment = enrollmentRepository.save(enrollment);
         coursePresenceBroadcaster.broadcastCoursePresence(courseId);
         return savedEnrollment;
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
     }
 
     public Enrollment getEnrollment(User currentUser, Long id) {
@@ -108,13 +98,9 @@ public class EnrollmentService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
         }
 
-<<<<<<< HEAD
-        enrollmentRepository.delete(enrollment);
-=======
         Long courseId = enrollment.getCourse().getId();
         enrollmentRepository.delete(enrollment);
         coursePresenceBroadcaster.broadcastCoursePresence(courseId);
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
     }
 
     private boolean isAdmin(User currentUser) {

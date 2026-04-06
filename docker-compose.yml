@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 version: '3.8'
-=======
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
 services:
   postgres:
     image: postgres:16

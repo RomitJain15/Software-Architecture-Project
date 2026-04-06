@@ -21,13 +21,10 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.http.HttpStatus;
-<<<<<<< HEAD
-=======
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
 
 @Configuration
 @EnableWebSecurity
@@ -41,10 +38,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-<<<<<<< HEAD
-=======
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/actuator/prometheus", "/actuator/health").permitAll()
@@ -57,9 +51,6 @@ public class SecurityConfig {
                 .build();
     }
 
-    @Bean
-<<<<<<< HEAD
-=======
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173"));
@@ -74,7 +65,6 @@ public class SecurityConfig {
     }
 
     @Bean
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
     public UserDetailsService userDetailsService() {
         return email -> userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));

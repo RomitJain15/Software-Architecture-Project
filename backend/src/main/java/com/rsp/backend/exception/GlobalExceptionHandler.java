@@ -10,11 +10,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-<<<<<<< HEAD
-=======
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
@@ -81,8 +78,6 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(status).body(response);
         }
 
-<<<<<<< HEAD
-=======
     @ExceptionHandler({MissingServletRequestPartException.class, MultipartException.class})
     public ResponseEntity<ApiErrorResponse> handleMultipartError(
             Exception ex,
@@ -101,7 +96,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(response);
     }
 
->>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiErrorResponse> handleBadCredentials(
             BadCredentialsException ex,
