@@ -10,4 +10,8 @@ import java.util.Optional;
 public interface RatingRepository extends JpaRepository<Rating, Long> {
     Optional<Rating> findByUserIdAndFileId(Long userId, Long fileId);
     List<Rating> findByFileId(Long fileId);
+<<<<<<< HEAD
+=======
+    void deleteByFileId(Long fileId);
+>>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
 }

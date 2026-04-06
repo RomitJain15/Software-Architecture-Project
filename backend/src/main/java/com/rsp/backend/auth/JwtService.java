@@ -8,7 +8,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+<<<<<<< HEAD
 import java.util.Date;
+=======
+import java.time.Instant;
+import java.util.Date;
+import java.util.UUID;
+>>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
 
 @Service
 public class JwtService {
@@ -23,11 +29,26 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
+<<<<<<< HEAD
     public String generateToken(UserDetails user) {
         return Jwts.builder()
                 .subject(user.getUsername())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
+=======
+    public long getExpiration() {
+        return expiration;
+    }
+
+    public String generateToken(UserDetails user, UUID sessionId) {
+        Instant issuedAt = Instant.now();
+        Instant expiresAt = issuedAt.plusMillis(expiration);
+        return Jwts.builder()
+                .subject(user.getUsername())
+                .id(sessionId.toString())
+                .issuedAt(Date.from(issuedAt))
+                .expiration(Date.from(expiresAt))
+>>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
                 .signWith(getKey())
                 .compact();
     }
@@ -37,6 +58,27 @@ public class JwtService {
                 .parseSignedClaims(token).getPayload().getSubject();
     }
 
+<<<<<<< HEAD
+=======
+    public UUID extractSessionId(String token) {
+        String jti = Jwts.parser().verifyWith(getKey()).build()
+                .parseSignedClaims(token).getPayload().getId();
+        return UUID.fromString(jti);
+    }
+
+    public Instant extractIssuedAt(String token) {
+        Date issuedAt = Jwts.parser().verifyWith(getKey()).build()
+                .parseSignedClaims(token).getPayload().getIssuedAt();
+        return issuedAt.toInstant();
+    }
+
+    public Instant extractExpiration(String token) {
+        Date expiresAt = Jwts.parser().verifyWith(getKey()).build()
+                .parseSignedClaims(token).getPayload().getExpiration();
+        return expiresAt.toInstant();
+    }
+
+>>>>>>> 497b56946d37a33dcc327d902cb7f04f9d06aaea
     public boolean isValid(String token, UserDetails user) {
         try {
             return extractEmail(token).equals(user.getUsername())
