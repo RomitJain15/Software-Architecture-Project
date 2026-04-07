@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 import './SignUp.css';
 
 function SignUp({ onSignIn }) {
@@ -49,7 +50,7 @@ function SignUp({ onSignIn }) {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/register', {
+      const response = await axios.post(`${API_BASE_URL}/auth/register`, {
         name: formData.username,
         email: formData.email,
         password: formData.password

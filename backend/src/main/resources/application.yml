@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/resourcesharing
-    username: admin
-    password: password
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/resourcesharing}
+    username: ${SPRING_DATASOURCE_USERNAME:admin}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
   servlet:
     multipart:
@@ -13,15 +13,11 @@ spring:
       ddl-auto: update
 
 server:
-  port: 8080
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus
+  port: ${PORT:8080}
 
 app:
+  frontend:
+    allowed-origins: ${FRONTEND_URLS:http://localhost:3000,http://localhost:5173}
   admin:
     seed:
       enabled: true
@@ -33,3 +29,9 @@ app:
     url: https://fppswvifqlpyudcxzevf.supabase.co
     service-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwcHN3dmlmcWxweXVkY3h6ZXZmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDM1Mzk4MywiZXhwIjoyMDg5OTI5OTgzfQ.dhsH7k4cOYrn14D6HvS5_Z5XOZa1aClySOYrPLAWk5U
     bucket: files
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus

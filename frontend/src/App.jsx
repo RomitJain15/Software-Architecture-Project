@@ -5,6 +5,7 @@ import SockJS from 'sockjs-client';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import { courseService } from './services/courseService';
+import { BACKEND_BASE_URL } from './config';
 import './App.css';
 
 function SearchableDropdown({
@@ -925,7 +926,7 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
     const authToken = localStorage.getItem('token') || '';
 
     const client = new Client({
-      webSocketFactory: () => new SockJS(`http://localhost:8080/ws?token=${encodeURIComponent(authToken)}`),
+      webSocketFactory: () => new SockJS(`${BACKEND_BASE_URL}/ws?token=${encodeURIComponent(authToken)}`),
       reconnectDelay: 5000,
       debug: () => {},
       onConnect: () => {
