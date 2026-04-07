@@ -16,6 +16,7 @@ function SearchableDropdown({
   disabled = false,
   emptyMessage = 'No matches found.',
   className = '',
+  searchable = true,
 }) {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -40,6 +41,10 @@ function SearchableDropdown({
   }, [query, selectedOption, value]);
 
   const filteredOptions = useMemo(() => {
+    if (!searchable) {
+      return options;
+    }
+
     const normalizedQuery = query.trim().toLowerCase();
 
     if (!normalizedQuery) {
@@ -47,9 +52,13 @@ function SearchableDropdown({
     }
 
     return options.filter((option) => option.label.toLowerCase().includes(normalizedQuery));
-  }, [options, query]);
+  }, [options, query, searchable]);
 
   const handleInputChange = (event) => {
+    if (!searchable) {
+      return;
+    }
+
     const nextQuery = event.target.value;
     setQuery(nextQuery);
 
@@ -76,8 +85,10 @@ function SearchableDropdown({
         value={query}
         placeholder={placeholder}
         disabled={disabled}
+        readOnly={!searchable}
         autoComplete="off"
         onFocus={() => setIsOpen(true)}
+        onClick={() => setIsOpen(true)}
         onBlur={() => {
           window.setTimeout(() => setIsOpen(false), 120);
         }}
@@ -510,7 +521,52 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
   const [adminEnrollActionLoading, setAdminEnrollActionLoading] = useState(false);
   const [adminEnrollActionError, setAdminEnrollActionError] = useState('');
   const [filesSortBy, setFilesSortBy] = useState('');
-  const [filesSortDirection, setFilesSortDirection] = useState('DESC');
+  const [filesSortDirection, setFilesSortDirection] = useState('');
+
+  const filesSortOptions = [
+    { value: '', label: 'Default (newest first)' },
+    { value: 'DATE', label: 'Date uploaded' },
+    { value: 'ALPHA', label: 'Alphabetical' },
+    { value: 'RATING', label: 'Rating' },
+  ];
+
+  const getFilesSortDirectionOptions = (sortBy) => {
+    switch (sortBy) {
+      case 'DATE':
+        return [
+          { value: 'DESC', label: 'Newest to Oldest' },
+          { value: 'ASC', label: 'Oldest to Newest' },
+        ];
+      case 'ALPHA':
+        return [
+          { value: 'ASC', label: 'A to Z' },
+          { value: 'DESC', label: 'Z to A' },
+        ];
+      case 'RATING':
+        return [
+          { value: 'DESC', label: 'Highest to Lowest' },
+          { value: 'ASC', label: 'Lowest to Highest' },
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const handleFilesSortByChange = (nextSortBy) => {
+    setFilesSortBy(nextSortBy);
+
+    if (!nextSortBy) {
+      setFilesSortDirection('');
+      return;
+    }
+
+    if (nextSortBy === 'ALPHA') {
+      setFilesSortDirection('ASC');
+      return;
+    }
+
+    setFilesSortDirection('DESC');
+  };
 
   const course = useMemo(
     () => courses.find((item) => item.id === parsedCourseId),
@@ -672,6 +728,51 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
     }
   }, [chatMessages, selectedChatUserId]);
 
+  const sortCourseFiles = (courseFiles, sortBy, sortDirection, averageMap = {}) => {
+    const normalizedDirection = (sortDirection || 'DESC').toUpperCase();
+
+    return [...courseFiles].sort((left, right) => {
+      if (sortBy === 'RATING') {
+        const leftAverage = averageMap[left.id]?.average ?? 0;
+        const rightAverage = averageMap[right.id]?.average ?? 0;
+
+        if (leftAverage !== rightAverage) {
+          return normalizedDirection === 'ASC'
+            ? leftAverage - rightAverage
+            : rightAverage - leftAverage;
+        }
+      }
+
+      if (sortBy === 'DATE') {
+        const leftDate = left.uploadedAt ? new Date(left.uploadedAt).getTime() : 0;
+        const rightDate = right.uploadedAt ? new Date(right.uploadedAt).getTime() : 0;
+
+        if (leftDate !== rightDate) {
+          return normalizedDirection === 'ASC' ? leftDate - rightDate : rightDate - leftDate;
+        }
+      }
+
+      if (sortBy === 'ALPHA') {
+        const comparison = (left.fileName || '').localeCompare(right.fileName || '', undefined, {
+          sensitivity: 'base',
+        });
+
+        if (comparison !== 0) {
+          return normalizedDirection === 'ASC' ? comparison : -comparison;
+        }
+      }
+
+      const leftUploadedAt = left.uploadedAt ? new Date(left.uploadedAt).getTime() : 0;
+      const rightUploadedAt = right.uploadedAt ? new Date(right.uploadedAt).getTime() : 0;
+
+      if (leftUploadedAt !== rightUploadedAt) {
+        return rightUploadedAt - leftUploadedAt;
+      }
+
+      return (Number(right.id) || 0) - (Number(left.id) || 0);
+    });
+  };
+
   const loadCourseFiles = async (isMounted, sortBy, sortDirection) => {
     if (!parsedCourseId) {
       setError('Invalid course id.');
@@ -682,11 +783,10 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
     setError('');
 
     try {
-      const courseFiles = await courseService.getFilesByCourse(parsedCourseId, sortBy, sortDirection);
+      const courseFiles = await courseService.getFilesByCourse(parsedCourseId);
       if (!isMounted) {
         return;
       }
-      setFiles(courseFiles);
 
       const ratingResults = await Promise.all(
         courseFiles.map(async (file) => {
@@ -708,6 +808,14 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
         ratingsMap[fileId] = ratings;
         averageMap[fileId] = average;
       });
+
+      const sortedFiles = sortCourseFiles(courseFiles, sortBy, sortDirection, averageMap);
+
+      if (!isMounted) {
+        return;
+      }
+
+      setFiles(sortedFiles);
       setRatingsByFile(ratingsMap);
       setAveragesByFile(averageMap);
     } catch (err) {
@@ -1418,29 +1526,33 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
             <section className="card course-files-sort">
               <div className="section-header section-header-inline">
                 <div>
-                  <h3>Sort Files</h3>
-                  <p className="section-subtitle">Organize files by your preference.</p>
+                  <p className="course-kicker">Sorting</p>
+                  <h3>Arrange files</h3>
+                  <p className="section-subtitle">Choose how the course files should be ordered.</p>
                 </div>
-                <div className="sort-controls">
-                  <select 
-                    value={filesSortBy} 
-                    onChange={(e) => setFilesSortBy(e.target.value)}
-                    className="sort-select"
-                  >
-                    <option value="">Default (newest first)</option>
-                    <option value="RATING">By Rating</option>
-                  </select>
-                  {filesSortBy && (
-                    <select 
-                      value={filesSortDirection} 
-                      onChange={(e) => setFilesSortDirection(e.target.value)}
-                      className="sort-select"
-                    >
-                      <option value="DESC">Highest First</option>
-                      <option value="ASC">Lowest First</option>
-                    </select>
-                  )}
-                </div>
+              </div>
+              <div className="sort-panel">
+                <SearchableDropdown
+                  label="Sort by"
+                  value={filesSortBy}
+                  onChange={handleFilesSortByChange}
+                  options={filesSortOptions}
+                  placeholder="Default (newest first)"
+                  emptyMessage="No sort options found."
+                  className="sort-dropdown"
+                  searchable={false}
+                />
+                <SearchableDropdown
+                  label="Direction"
+                  value={filesSortDirection}
+                  onChange={setFilesSortDirection}
+                  options={getFilesSortDirectionOptions(filesSortBy)}
+                  placeholder={filesSortBy ? 'Choose a direction' : 'Select a sort type first'}
+                  disabled={!filesSortBy}
+                  emptyMessage="No direction options available."
+                  className="sort-dropdown"
+                  searchable={false}
+                />
               </div>
             </section>
 

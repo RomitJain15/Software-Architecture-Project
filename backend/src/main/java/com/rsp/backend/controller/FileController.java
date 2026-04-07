@@ -7,11 +7,13 @@ import com.rsp.backend.model.User;
 import com.rsp.backend.repository.CourseRepository;
 import com.rsp.backend.repository.EnrollmentRepository;
 import com.rsp.backend.repository.FileMetadataRepository;
+import com.rsp.backend.repository.RatingRepository;
 import com.rsp.backend.service.FileMetadataService;
 import com.rsp.backend.service.SupabaseStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,6 +30,7 @@ public class FileController {
     private final FileMetadataService fileMetadataService;
     private final CourseRepository courseRepository;
     private final FileMetadataRepository fileMetadataRepository;
+    private final RatingRepository ratingRepository;
     private final EnrollmentRepository enrollmentRepository;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -68,6 +71,7 @@ public class FileController {
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<Void> deleteFile(
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long id) {
@@ -84,8 +88,11 @@ public class FileController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
         }
 
-        supabaseStorageService.delete(metadata.getObjectPath());
+        ratingRepository.deleteByFileId(id);
+        ratingRepository.flush();
         fileMetadataRepository.delete(metadata);
+        fileMetadataRepository.flush();
+        supabaseStorageService.delete(metadata.getObjectPath());
         return ResponseEntity.noContent().build();
     }
 

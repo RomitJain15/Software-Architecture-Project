@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.UUID;
+import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -81,13 +82,17 @@ public class SupabaseStorageService {
                 .delete()
                 .uri(deleteUrl)
                 .header("Authorization", "Bearer " + supabaseServiceKey)
-                .retrieve()
-                .onStatus(status -> !status.is2xxSuccessful(), response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new ResponseStatusException(
-                                        HttpStatus.BAD_GATEWAY,
-                                        "Supabase delete failed: " + body)))
-                .toBodilessEntity()
+            .exchangeToMono(response -> {
+                if (response.statusCode().is2xxSuccessful() || response.statusCode().value() == 404) {
+                return response.releaseBody();
+                }
+
+                return response.bodyToMono(String.class)
+                    .defaultIfEmpty("")
+                    .flatMap(body -> Mono.error(new ResponseStatusException(
+                        HttpStatus.BAD_GATEWAY,
+                        "Supabase delete failed: " + body)));
+            })
                 .block();
     }
 

@@ -7,8 +7,6 @@ import com.rsp.backend.repository.FileMetadataRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 import java.util.List;
 
 @Service
@@ -32,23 +30,6 @@ public class FileMetadataService {
     }
 
     public List<FileMetadata> listFilesByCourse(Long courseId, String sortBy, String direction) {
-        if (sortBy == null || sortBy.isBlank()) {
-            return fileMetadataRepository.findByCourseId(courseId);
-        }
-
-        if (!sortBy.equalsIgnoreCase("RATING")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid sortBy value. Allowed: RATING");
-        }
-
-        String normalizedDirection = direction == null ? "DESC" : direction.toUpperCase();
-        if (!normalizedDirection.equals("ASC") && !normalizedDirection.equals("DESC")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid direction value. Allowed: ASC, DESC");
-        }
-
-        if (normalizedDirection.equals("DESC")) {
-            return fileMetadataRepository.findByCourseIdOrderByRatingDesc(courseId);
-        } else {
-            return fileMetadataRepository.findByCourseIdOrderByRatingAsc(courseId);
-        }
+        return fileMetadataRepository.findByCourseId(courseId);
     }
 }
