@@ -1898,12 +1898,22 @@ function App() {
   const fetchCoursesAndEnrollments = async () => {
     setLoadingCourses(true);
     try {
-      const [coursesData, enrollmentsData] = await Promise.all([
+      const [coursesResult, enrollmentsResult] = await Promise.allSettled([
         courseService.getAllCourses(),
         courseService.getMyEnrollments(),
       ]);
-      setCourses(coursesData);
-      setEnrollments(enrollmentsData);
+
+      if (coursesResult.status === 'fulfilled') {
+        setCourses(coursesResult.value);
+      }
+
+      if (enrollmentsResult.status === 'fulfilled') {
+        setEnrollments(enrollmentsResult.value);
+      }
+
+      if (coursesResult.status === 'rejected' && enrollmentsResult.status === 'rejected') {
+        throw coursesResult.reason;
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {

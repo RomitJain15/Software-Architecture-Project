@@ -30,12 +30,14 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.findByEmail(request.email()).isPresent()) {
+        String normalizedEmail = normalizeEmail(request.email());
+
+        if (userRepository.findByEmailIgnoreCase(normalizedEmail).isPresent()) {
             throw new EmailAlreadyRegisteredException("Email already registered");
         }
         var user = User.builder()
                 .fullName(request.name())
-                .email(request.email())
+                .email(normalizedEmail)
                 .password(passwordEncoder.encode(request.password()))
             .role(Role.STUDENT)
                 .build();
@@ -53,9 +55,11 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
+        String normalizedEmail = normalizeEmail(request.email());
+
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password()));
-        var user = userRepository.findByEmail(request.email()).orElseThrow();
+            new UsernamePasswordAuthenticationToken(normalizedEmail, request.password()));
+        var user = userRepository.findByEmailIgnoreCase(normalizedEmail).orElseThrow();
             Instant issuedAt = Instant.now();
             AuthSession session = authSessionService.createSession(
                 user,
@@ -85,5 +89,9 @@ public class AuthService {
         } catch (Exception ex) {
             throw new ResponseStatusException(BAD_REQUEST, "Invalid authorization token");
         }
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase();
     }
 }

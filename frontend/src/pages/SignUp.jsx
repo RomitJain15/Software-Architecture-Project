@@ -52,7 +52,7 @@ function SignUp({ onSignIn }) {
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/register`, {
         name: formData.username,
-        email: formData.email,
+        email: formData.email.trim().toLowerCase(),
         password: formData.password
       });
 

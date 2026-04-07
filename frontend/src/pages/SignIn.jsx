@@ -19,7 +19,7 @@ function SignIn({ onSignIn }) {
 
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/login`, {
-        email,
+        email: email.trim().toLowerCase(),
         password
       });
 
