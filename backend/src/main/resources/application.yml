@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/resourcesharing
+    username: admin
+    password: password
+    driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+app:
+  admin:
+    seed:
+      enabled: true
+      reset-users: false
+      email: admin@example.com
+      password: admin123
+      name: Admin
+  supabase:
+    url: https://fppswvifqlpyudcxzevf.supabase.co
+    service-key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwcHN3dmlmcWxweXVkY3h6ZXZmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDM1Mzk4MywiZXhwIjoyMDg5OTI5OTgzfQ.dhsH7k4cOYrn14D6HvS5_Z5XOZa1aClySOYrPLAWk5U
+    bucket: files
