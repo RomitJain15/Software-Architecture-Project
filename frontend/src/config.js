@@ -1,4 +1,6 @@
-const configuredBaseUrl = (process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api').replace(/\/$/, '');
+const runtimeHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+const fallbackApiBaseUrl = `http://${runtimeHost}:8080/api`;
+const configuredBaseUrl = (process.env.REACT_APP_API_BASE_URL || fallbackApiBaseUrl).replace(/\/$/, '');
 
 const API_BASE_URL = configuredBaseUrl.endsWith('/api')
   ? configuredBaseUrl
