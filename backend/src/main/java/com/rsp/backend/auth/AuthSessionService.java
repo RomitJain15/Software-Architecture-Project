@@ -4,6 +4,7 @@ import com.rsp.backend.model.User;
 import com.rsp.backend.repository.AuthSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -12,10 +13,12 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuthSessionService {
 
     private final AuthSessionRepository authSessionRepository;
 
+    @Transactional
     public AuthSession createSession(User user, Instant issuedAt, Instant expiresAt) {
         AuthSession session = AuthSession.builder()
                 .sessionId(UUID.randomUUID())
@@ -30,6 +33,7 @@ public class AuthSessionService {
         return authSessionRepository.existsBySessionIdAndRevokedAtIsNullAndExpiresAtAfter(sessionId, now);
     }
 
+    @Transactional
     public void revokeSession(UUID sessionId, Instant revokedAt, String reason) {
         authSessionRepository.findBySessionId(sessionId).ifPresent(session -> {
             if (session.getRevokedAt() == null) {

@@ -12,12 +12,14 @@ import com.rsp.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class EnrollmentService {
 
     private final EnrollmentRepository enrollmentRepository;
@@ -26,6 +28,7 @@ public class EnrollmentService {
     private final CoursePresenceBroadcaster coursePresenceBroadcaster;
     private final CoursePresenceRegistry coursePresenceRegistry;
 
+    @Transactional
     public Enrollment enroll(User currentUser, Long requestedUserId, Long courseId) {
         if (currentUser == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
@@ -88,6 +91,7 @@ public class EnrollmentService {
         return enrollmentRepository.findAll();
     }
 
+    @Transactional
     public void deleteEnrollment(User currentUser, Long id) {
         if (currentUser == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");

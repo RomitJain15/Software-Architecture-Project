@@ -15,6 +15,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CourseService {
 
     private final CourseRepository courseRepository;
@@ -22,6 +23,7 @@ public class CourseService {
     private final FileMetadataRepository fileMetadataRepository;
     private final RatingRepository ratingRepository;
 
+    @Transactional
     public Course createCourse(Course course) {
         if (courseRepository.existsByNameIgnoreCase(course.getName())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Course name already exists");

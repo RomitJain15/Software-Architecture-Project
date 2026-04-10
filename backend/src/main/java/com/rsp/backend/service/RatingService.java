@@ -11,12 +11,14 @@ import com.rsp.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RatingService {
 
     private final RatingRepository ratingRepository;
@@ -24,6 +26,7 @@ public class RatingService {
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public Rating upsertRating(User currentUser, Long fileId, Long requestedUserId, Integer value) {
         if (currentUser == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
@@ -68,6 +71,7 @@ public class RatingService {
         return new RatingAverage(fileId, ratings.size(), avg);
     }
 
+    @Transactional
     public void deleteRating(User currentUser, Long fileId, Long requestedUserId) {
         if (currentUser == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
