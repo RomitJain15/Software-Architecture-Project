@@ -63,12 +63,29 @@ Defined services:
 
 - postgres (postgres:16)
 - redis (redis:7-alpine)
+- prometheus (prom/prometheus)
+- grafana (grafana/grafana)
 
 Compose environment values currently include:
 
 - POSTGRES_DB=resourcesharing
 - POSTGRES_USER=admin
 - POSTGRES_PASSWORD=password
+
+Prometheus configuration:
+
+- monitoring/prometheus.yml
+- Scrapes backend metrics from /actuator/prometheus at host.docker.internal:8080
+
+Grafana defaults:
+
+- URL: http://localhost:3001
+- Username: admin
+- Password: admin
+
+Prometheus URL:
+
+- http://localhost:9090
 
 ## Local Development Setup
 
