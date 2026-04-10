@@ -69,7 +69,7 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return email -> userRepository.findByEmail(email == null ? "" : email.trim().toLowerCase())
+        return email -> userRepository.findByEmailIgnoreCase(email == null ? "" : email.trim())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 

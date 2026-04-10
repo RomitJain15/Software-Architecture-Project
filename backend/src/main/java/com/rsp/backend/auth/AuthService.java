@@ -32,7 +32,7 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request) {
         String normalizedEmail = normalizeEmail(request.email());
 
-        if (userRepository.findByEmail(normalizedEmail).isPresent()) {
+        if (userRepository.findByEmailIgnoreCase(normalizedEmail).isPresent()) {
             throw new EmailAlreadyRegisteredException("Email already registered");
         }
         var user = User.builder()
@@ -59,7 +59,7 @@ public class AuthService {
 
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(normalizedEmail, request.password()));
-        var user = userRepository.findByEmail(normalizedEmail).orElseThrow();
+        var user = userRepository.findByEmailIgnoreCase(normalizedEmail).orElseThrow();
             Instant issuedAt = Instant.now();
             AuthSession session = authSessionService.createSession(
                 user,
