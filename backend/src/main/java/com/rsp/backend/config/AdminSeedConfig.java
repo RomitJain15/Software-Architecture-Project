@@ -2,9 +2,13 @@ package com.rsp.backend.config;
 
 import com.rsp.backend.model.Role;
 import com.rsp.backend.model.User;
+import com.rsp.backend.model.Course;
+import com.rsp.backend.repository.CourseRepository;
 import com.rsp.backend.repository.EnrollmentRepository;
+import com.rsp.backend.repository.FileMetadataRepository;
 import com.rsp.backend.repository.RatingRepository;
 import com.rsp.backend.repository.UserRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +27,8 @@ public class AdminSeedConfig {
     private final UserRepository userRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final RatingRepository ratingRepository;
+    private final CourseRepository courseRepository;
+    private final FileMetadataRepository fileMetadataRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${app.admin.seed.enabled:false}")
@@ -30,6 +36,9 @@ public class AdminSeedConfig {
 
     @Value("${app.admin.seed.reset-users:false}")
     private boolean resetUsers;
+
+    @Value("${app.admin.seed.reset-data:false}")
+    private boolean resetData;
 
     @Value("${app.admin.seed.email:admin@example.com}")
     private String adminEmail;
@@ -46,12 +55,17 @@ public class AdminSeedConfig {
             if (!seedEnabled) {
                 return;
             }
-
             if (resetUsers) {
                 ratingRepository.deleteAll();
                 enrollmentRepository.deleteAll();
                 userRepository.deleteAll();
                 logger.warn("All users deleted due to app.admin.seed.reset-users=true");
+            }
+
+            if (resetData) {
+                fileMetadataRepository.deleteAll();
+                courseRepository.deleteAll();
+                logger.warn("All files and courses deleted due to app.admin.seed.reset-data=true");
             }
 
             userRepository.findByEmail(adminEmail).ifPresentOrElse(user -> {
@@ -68,6 +82,36 @@ public class AdminSeedConfig {
                 userRepository.save(admin);
                 logger.info("Admin user created: {}", adminEmail);
             });
+        };
+    }
+
+    @Value("${app.courses.seed.enabled:true}")
+    private boolean coursesSeedEnabled;
+
+    @Bean
+    public CommandLineRunner seedCourses() {
+        return args -> {
+            if (!coursesSeedEnabled && !resetData) return;
+
+            if (resetData) {
+                fileMetadataRepository.deleteAll();
+                courseRepository.deleteAll();
+                logger.warn("All files and courses deleted due to app.admin.seed.reset-data=true");
+            }
+
+            if (courseRepository.count() == 0) {
+                List<Course> defaults = List.of(
+                        Course.builder().name("Computer Networks").courseCode("CS301").description("Introduction to computer networks").build(),
+                        Course.builder().name("Operating Systems").courseCode("CS302").description("Operating systems concepts").build(),
+                        Course.builder().name("Data Structures").courseCode("CS201").description("Fundamentals of data structures").build(),
+                        Course.builder().name("Databases").courseCode("CS303").description("Relational database systems").build(),
+                        Course.builder().name("Algorithms").courseCode("CS202").description("Algorithm design and analysis").build()
+                );
+                courseRepository.saveAll(defaults);
+                logger.info("Seeded {} default courses", defaults.size());
+            } else {
+                logger.info("Courses already present - skipping seeding");
+            }
         };
     }
 }

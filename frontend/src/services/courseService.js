@@ -322,4 +322,23 @@ export const courseService = {
       throw error;
     }
   },
+
+  // Search files by filename (optionally restrict to course)
+  searchFiles: async (query, courseId = null) => {
+    try {
+      const params = { q: query };
+      if (courseId) params.courseId = courseId;
+      const response = await axios.get(
+        `${API_BASE_URL}/files/search`,
+        {
+          headers: getAuthHeaders(),
+          params,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error searching files:', error);
+      throw error;
+    }
+  },
 };

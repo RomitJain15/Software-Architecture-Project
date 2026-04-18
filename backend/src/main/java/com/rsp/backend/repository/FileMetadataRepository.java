@@ -35,4 +35,10 @@ public interface FileMetadataRepository extends JpaRepository<FileMetadata, Long
             + "ORDER BY COALESCE(AVG(CAST(r.value AS double)), 0) ASC, f.uploadedAt DESC, f.id DESC")
         @EntityGraph(attributePaths = {"course", "uploadedBy"})
     List<FileMetadata> findByCourseIdOrderByRatingAsc(@Param("courseId") Long courseId);
+
+    @EntityGraph(attributePaths = {"course", "uploadedBy"})
+    List<FileMetadata> findByFileNameContainingIgnoreCase(String fileName);
+
+    @EntityGraph(attributePaths = {"course", "uploadedBy"})
+    List<FileMetadata> findByFileNameContainingIgnoreCaseAndCourseId(String fileName, Long courseId);
 }

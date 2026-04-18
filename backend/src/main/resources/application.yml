@@ -24,6 +24,10 @@ spring:
     init:
       mode: always
 
+  redis:
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
+
 server:
   port: ${PORT:8080}
 

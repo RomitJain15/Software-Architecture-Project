@@ -42,14 +42,11 @@ public class AuthService {
             .role(Role.STUDENT)
                 .build();
         userRepository.save(user);
-            Instant issuedAt = Instant.now();
-            AuthSession session = authSessionService.createSession(
-                user,
-                issuedAt,
-                issuedAt.plusMillis(jwtService.getExpiration())
-            );
+        Instant issuedAt = Instant.now();
+        Instant expiresAt = issuedAt.plusMillis(jwtService.getExpiration());
+        AuthSession session = authSessionService.createSession(user, issuedAt, expiresAt);
         return new AuthResponse(
-            jwtService.generateToken(user, session.getSessionId()),
+                jwtService.generateToken(user, session.getSessionId(), issuedAt, expiresAt),
                 new UserSummary(user.getId(), user.getFullName(), user.getEmail(), user.getRole(), user.getCreatedAt())
         );
     }
@@ -60,14 +57,11 @@ public class AuthService {
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(normalizedEmail, request.password()));
         var user = userRepository.findByEmailIgnoreCase(normalizedEmail).orElseThrow();
-            Instant issuedAt = Instant.now();
-            AuthSession session = authSessionService.createSession(
-                user,
-                issuedAt,
-                issuedAt.plusMillis(jwtService.getExpiration())
-            );
+        Instant issuedAt = Instant.now();
+        Instant expiresAt = issuedAt.plusMillis(jwtService.getExpiration());
+        AuthSession session = authSessionService.createSession(user, issuedAt, expiresAt);
         return new AuthResponse(
-                jwtService.generateToken(user, session.getSessionId()),
+                jwtService.generateToken(user, session.getSessionId(), issuedAt, expiresAt),
                 new UserSummary(user.getId(), user.getFullName(), user.getEmail(), user.getRole(), user.getCreatedAt())
         );
     }

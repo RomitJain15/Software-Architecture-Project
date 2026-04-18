@@ -158,11 +158,9 @@ function Dashboard({
     event.preventDefault();
     event.stopPropagation();
   };
-
-  const handleCardNavigation = (courseId) => {
-    navigate(`/courses/${courseId}`);
-  };
-
+    const handleCardNavigation = (courseId) => {
+      navigate(`/courses/${courseId}`);
+    };
   return (
     <div className="app">
       <div className={`app-shell ${isAdmin ? 'admin-theme' : 'student-theme'}`}>
@@ -172,8 +170,8 @@ function Dashboard({
               <span className="brand-icon">📚</span>
             </div>
             <div className="brand-text">
-              <p className="brand-eyebrow">{isAdmin ? 'StudyHub Admin Console' : 'Welcome to StudyHub'}</p>
-              <h1>{isAdmin ? 'Admin Dashboard' : 'Dashboard'}</h1>
+              <p className="brand-eyebrow">Dashboard</p>
+              <h1>Overview</h1>
             </div>
           </div>
           <div className="header-actions">
@@ -181,78 +179,7 @@ function Dashboard({
             <button onClick={handleSignOut} className="ghost-btn">Sign Out</button>
           </div>
         </header>
-
-        <main className="dashboard-content">
-          {isAdmin ? (
-            <section className="dashboard-grid">
-              <section className="card info-card">
-                <h3>🛠 Admin Tools</h3>
-                <div className="info-list">
-                  <div className="stat-item">
-                    <p className="info-label">Courses</p>
-                    <p className="info-value">{courses.length}</p>
-                  </div>
-                </div>
-                <form className="admin-form" onSubmit={handleSaveCourse}>
-                  <div className="admin-form-row">
-                    <label htmlFor="courseName">Course Name</label>
-                    <input
-                      id="courseName"
-                      name="name"
-                      type="text"
-                      value={courseForm.name}
-                      onChange={handleCourseFormChange}
-                      placeholder="Intro to Architecture"
-                      required
-                    />
-                  </div>
-                  <div className="admin-form-row">
-                    <label htmlFor="courseCode">Course Code</label>
-                    <input
-                      id="courseCode"
-                      name="courseCode"
-                      type="text"
-                      value={courseForm.courseCode}
-                      onChange={handleCourseFormChange}
-                      placeholder="SWE-301"
-                      required
-                    />
-                  </div>
-                  <div className="admin-form-row">
-                    <label htmlFor="courseDescription">Description</label>
-                    <textarea
-                      id="courseDescription"
-                      name="description"
-                      value={courseForm.description}
-                      onChange={handleCourseFormChange}
-                      placeholder="Short course summary"
-                      rows="3"
-                    />
-                  </div>
-                  {courseActionError && (
-                    <div className="admin-form-error">{courseActionError}</div>
-                  )}
-                  <div className="admin-form-actions">
-                    <button className="admin-btn" type="submit" disabled={courseActionLoading}>
-                      {courseActionLoading
-                        ? 'Saving...'
-                        : editingCourseId
-                          ? 'Update Course'
-                          : 'Create Course'}
-                    </button>
-                    <button
-                      className="admin-btn outline"
-                      type="button"
-                      onClick={resetCourseForm}
-                      disabled={courseActionLoading}
-                    >
-                      Clear
-                    </button>
-                  </div>
-                </form>
-              </section>
-            </section>
-          ) : (
+        <main className="dashboard-page">
             <section className="student-dashboard-layout">
               <div className="student-dashboard-main">
                 <section className="courses-section">
@@ -364,7 +291,49 @@ function Dashboard({
                   <h2>📘 All Courses</h2>
                   <p className="section-subtitle">Manage and oversee every course</p>
                 </div>
-                {loadingCourses ? (
+                  <form className="admin-form" onSubmit={handleSaveCourse}>
+                    <div className="admin-form-row">
+                      <label htmlFor="courseName">Course name</label>
+                      <input
+                        id="courseName"
+                        name="name"
+                        value={courseForm.name}
+                        onChange={handleCourseFormChange}
+                        placeholder="Course title"
+                      />
+                    </div>
+                    <div className="admin-form-row">
+                      <label htmlFor="courseCode">Course code</label>
+                      <input
+                        id="courseCode"
+                        name="courseCode"
+                        value={courseForm.courseCode}
+                        onChange={handleCourseFormChange}
+                        placeholder="CODE101"
+                      />
+                    </div>
+                    <div className="admin-form-row">
+                      <label htmlFor="courseDescription">Description</label>
+                      <textarea
+                        id="courseDescription"
+                        name="description"
+                        value={courseForm.description}
+                        onChange={handleCourseFormChange}
+                        placeholder="Short course summary"
+                        rows="3"
+                      />
+                    </div>
+                    {courseActionError && <div className="admin-form-error">{courseActionError}</div>}
+                    <div className="admin-form-actions">
+                      <button className="admin-btn" type="submit" disabled={courseActionLoading}>
+                        {courseActionLoading ? 'Saving...' : editingCourseId ? 'Update Course' : 'Create Course'}
+                      </button>
+                      <button className="admin-btn outline" type="button" onClick={resetCourseForm} disabled={courseActionLoading}>
+                        Clear
+                      </button>
+                    </div>
+                  </form>
+                  {loadingCourses ? (
                   <div className="loading">Loading courses...</div>
                 ) : courses.length > 0 ? (
                   <div className="courses-grid">
@@ -478,10 +447,17 @@ function ProfilePage({ isAdmin, userData, normalizedRole, onSignOut }) {
 function CoursePage({ isAdmin, userData, courses, enrollments }) {
   const { courseId } = useParams();
   const parsedCourseId = Number(courseId);
+  const course = useMemo(
+    () => courses.find((item) => item.id === parsedCourseId) || null,
+    [courses, parsedCourseId]
+  );
   const maxUploadSizeBytes = 25 * 1024 * 1024;
   const [files, setFiles] = useState([]);
   const [ratingsByFile, setRatingsByFile] = useState({});
   const [averagesByFile, setAveragesByFile] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -553,30 +529,15 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
     }
   };
 
-  const handleFilesSortByChange = (nextSortBy) => {
-    setFilesSortBy(nextSortBy);
-
-    if (!nextSortBy) {
-      setFilesSortDirection('');
-      return;
-    }
-
-    if (nextSortBy === 'ALPHA') {
-      setFilesSortDirection('ASC');
-      return;
-    }
-
-    setFilesSortDirection('DESC');
-  };
-
-  const course = useMemo(
-    () => courses.find((item) => item.id === parsedCourseId),
-    [courses, parsedCourseId]
-  );
-
   const isEnrolled = useMemo(
-    () => enrollments.some((enrollment) => enrollment.courseId === parsedCourseId),
-    [enrollments, parsedCourseId]
+    () => {
+      if (isAdmin) {
+        return true;
+      }
+
+      return enrollments.some((enrollment) => enrollment.courseId === parsedCourseId);
+    },
+    [enrollments, parsedCourseId, isAdmin]
   );
   const shouldBlockAccess = !isAdmin && !isEnrolled;
 
@@ -810,6 +771,13 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
         averageMap[fileId] = average;
       });
 
+      // Initialize user's current rating inputs so stars reflect saved ratings
+      const ratingInputsMap = {};
+      ratingResults.forEach(({ fileId, ratings }) => {
+        const myRating = ratings && ratings.find((r) => Number(r.userId) === Number(userData?.id));
+        ratingInputsMap[fileId] = myRating ? myRating.value : '';
+      });
+
       const sortedFiles = sortCourseFiles(courseFiles, sortBy, sortDirection, averageMap);
 
       if (!isMounted) {
@@ -819,6 +787,7 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
       setFiles(sortedFiles);
       setRatingsByFile(ratingsMap);
       setAveragesByFile(averageMap);
+      setRatingInputs(ratingInputsMap);
     } catch (err) {
       if (isMounted) {
         setError(err.response?.data?.message || 'Failed to load course files.');
@@ -827,6 +796,71 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
       if (isMounted) {
         setLoading(false);
       }
+    }
+  };
+
+  const handleSearch = async (eventOrIsMounted, maybeIsMounted) => {
+    // Support calling as (event) from form submit, or (isMounted) from effects
+    let isMounted = true;
+    if (typeof eventOrIsMounted === 'boolean') {
+      isMounted = eventOrIsMounted;
+    } else {
+      if (eventOrIsMounted && eventOrIsMounted.preventDefault) {
+        eventOrIsMounted.preventDefault();
+      }
+      if (typeof maybeIsMounted === 'boolean') {
+        isMounted = maybeIsMounted;
+      }
+    }
+
+    const query = (searchQuery || '').trim();
+
+    if (!query) {
+      if (isMounted) {
+        await loadCourseFiles(true, filesSortBy, filesSortDirection);
+      }
+      return;
+    }
+
+    if (isMounted) {
+      setSearchLoading(true);
+      setSearchError('');
+      setError('');
+    }
+
+    try {
+      const results = await courseService.searchFiles(query, parsedCourseId);
+      if (!isMounted) return;
+
+      const ratingResults = await Promise.all(
+        results.map(async (file) => {
+          const [ratings, average] = await Promise.all([
+            courseService.getRatingsByFile(file.id),
+            courseService.getAverageRating(file.id),
+          ]);
+          return { fileId: file.id, ratings, average };
+        })
+      );
+
+      if (!isMounted) return;
+
+      const ratingsMap = {};
+      const averageMap = {};
+      ratingResults.forEach(({ fileId, ratings, average }) => {
+        ratingsMap[fileId] = ratings;
+        averageMap[fileId] = average;
+      });
+
+      const sortedFiles = sortCourseFiles(results, filesSortBy, filesSortDirection, averageMap);
+      if (isMounted) {
+        setFiles(sortedFiles);
+        setRatingsByFile(ratingsMap);
+        setAveragesByFile(averageMap);
+      }
+    } catch (err) {
+      if (isMounted) setSearchError(err.response?.data?.message || 'Search failed.');
+    } finally {
+      if (isMounted) setSearchLoading(false);
     }
   };
 
@@ -839,12 +873,17 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
       };
     }
 
-    loadCourseFiles(isMounted, filesSortBy, filesSortDirection);
+    if (searchQuery && searchQuery.trim()) {
+      // If user has an active search, refresh search results when sort or course changes
+      handleSearch(isMounted);
+    } else {
+      loadCourseFiles(isMounted, filesSortBy, filesSortDirection);
+    }
 
     return () => {
       isMounted = false;
     };
-  }, [parsedCourseId, shouldBlockAccess, filesSortBy, filesSortDirection]);
+  }, [parsedCourseId, shouldBlockAccess, filesSortBy, filesSortDirection, searchQuery]);
 
   useEffect(() => {
     let isMounted = true;
@@ -1162,6 +1201,8 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
                 You need to be enrolled in this course to access its workspace.
               </p>
             </section>
+
+            
           </main>
         </div>
       </div>
@@ -1271,52 +1312,31 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
     }
   };
 
-  const handleRatingChange = (fileId, value) => {
-    setRatingInputs((prev) => ({
-      ...prev,
-      [fileId]: value,
-    }));
-  };
+  const handleToggleRating = async (fileId, value) => {
+    const current = Number(ratingInputs[fileId]) || 0;
+    const next = current === value ? '' : value;
 
-  const handleSaveRating = async (fileId) => {
-    const value = Number(ratingInputs[fileId]);
-    if (!value || value < 1 || value > 5) {
-      setRatingErrors((prev) => ({
-        ...prev,
-        [fileId]: 'Select a rating from 1 to 5.',
-      }));
-      return;
-    }
-
+    // Optimistically update UI
+    setRatingInputs((prev) => ({ ...prev, [fileId]: next }));
     setRatingSaving((prev) => ({ ...prev, [fileId]: true }));
     setRatingErrors((prev) => ({ ...prev, [fileId]: '' }));
 
     try {
-      await courseService.upsertRating(fileId, userData?.id, value);
+      if (next === '') {
+        await courseService.deleteRating(fileId, userData?.id);
+      } else {
+        await courseService.upsertRating(fileId, userData?.id, Number(next));
+      }
+
+      // Refresh listing and ratings
       await loadCourseFiles(true, filesSortBy, filesSortDirection);
     } catch (err) {
+      // revert optimistic update on error
       setRatingErrors((prev) => ({
         ...prev,
         [fileId]: err.response?.data?.message || 'Failed to save rating.',
       }));
-    } finally {
-      setRatingSaving((prev) => ({ ...prev, [fileId]: false }));
-    }
-  };
-
-  const handleRemoveRating = async (fileId) => {
-    setRatingSaving((prev) => ({ ...prev, [fileId]: true }));
-    setRatingErrors((prev) => ({ ...prev, [fileId]: '' }));
-
-    try {
-      await courseService.deleteRating(fileId, userData?.id);
-      setRatingInputs((prev) => ({ ...prev, [fileId]: '' }));
-      await loadCourseFiles(true, filesSortBy, filesSortDirection);
-    } catch (err) {
-      setRatingErrors((prev) => ({
-        ...prev,
-        [fileId]: err.response?.data?.message || 'Failed to remove rating.',
-      }));
+      setRatingInputs((prev) => ({ ...prev, [fileId]: String(current) || '' }));
     } finally {
       setRatingSaving((prev) => ({ ...prev, [fileId]: false }));
     }
@@ -1524,19 +1544,52 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
               {uploadError && <div className="admin-form-error">{uploadError}</div>}
             </form>
 
-            <section className="card course-files-sort">
+            <section className="card course-files-control">
               <div className="section-header section-header-inline">
                 <div>
-                  <p className="course-kicker">Sorting</p>
-                  <h3>Arrange files</h3>
-                  <p className="section-subtitle">Choose how the course files should be ordered.</p>
+                  <p className="course-kicker">Find & Arrange</p>
+                  <h3>Find & Arrange Files</h3>
+                  <p className="section-subtitle">Search filenames and choose how the files are ordered.</p>
                 </div>
               </div>
+
+              <form className="search-form search-row" onSubmit={handleSearch}>
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="Search filenames (press Enter)"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Search files by name"
+                />
+                <div className="search-actions">
+                  <button className="admin-btn" type="submit" disabled={searchLoading}>
+                    {searchLoading ? 'Searching...' : 'Search'}
+                  </button>
+                  <button
+                    className="admin-btn outline"
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery('');
+                      handleSearch();
+                    }}
+                  >
+                    Clear
+                  </button>
+                </div>
+                {searchError && <div className="admin-form-error">{searchError}</div>}
+              </form>
+
               <div className="sort-panel">
                 <SearchableDropdown
                   label="Sort by"
                   value={filesSortBy}
-                  onChange={handleFilesSortByChange}
+                  onChange={(value) => {
+                    setFilesSortBy(value);
+                    if (value === '') {
+                      setFilesSortDirection('');
+                    }
+                  }}
                   options={filesSortOptions}
                   placeholder="Default (newest first)"
                   emptyMessage="No sort options found."
@@ -1574,74 +1627,64 @@ function CoursePage({ isAdmin, userData, courses, enrollments }) {
                 const ratingCount = average?.count ?? ratings.length;
 
                 return (
-                  <div key={file.id} className="file-card">
+                  <div key={file.id} className="file-card file-card-compact">
                     <div className="file-main">
-                      <div>
+                      <div className="file-main-left">
                         <h3>
-                          <a className="file-link" href={file.fileUrl} download>
+                          <a className="file-link" href={file.fileUrl} download title={file.fileName}>
                             {file.fileName}
                           </a>
                         </h3>
-                        <p className="file-meta">
-                          {file.fileType || 'file'} • {(file.fileSize || 0) / 1024 > 0 ? `${Math.round(file.fileSize / 1024)} KB` : '—'}
-                        </p>
-                        <span className="uploader-chip">Uploaded by {file.uploadedByName || 'Unknown'}</span>
+                        <div className="file-meta-row">
+                          <p className="file-meta">
+                            {file.fileType || 'file'} • {(file.fileSize || 0) / 1024 > 0 ? `${Math.round(file.fileSize / 1024)} KB` : '—'}
+                          </p>
+                          <span className="uploader-chip">Uploaded by {file.uploadedByName || 'Unknown'}</span>
+                        </div>
                       </div>
-                      <div className="file-actions">
-                        {(isAdmin || file.uploadedBy === userData?.id) && (
-                          <button
-                            className="admin-btn outline"
-                            type="button"
-                            onClick={() => handleDeleteFile(file.id)}
-                          >
-                            Delete
-                          </button>
-                        )}
+                      <div className="file-main-right">
+                        <div className="file-rating-inline">
+                          <div className="rating-summary">
+                            <p className="info-label">Average</p>
+                            <p className="info-value">{averageValue !== null ? averageValue.toFixed(1) : '—'}</p>
+                          </div>
+                          <div className="rating-summary">
+                            <p className="info-label">Ratings</p>
+                            <p className="info-value">{ratingCount}</p>
+                          </div>
+                          <div className="rating-actions-inline">
+                            <div className="rating-controls-inline">
+                              {[1, 2, 3, 4, 5].map((value) => (
+                                <button
+                                  key={value}
+                                  type="button"
+                                  className={`rating-star ${Number(ratingInputs[file.id]) >= value ? 'active' : ''}`}
+                                  onClick={() => handleToggleRating(file.id, value)}
+                                  disabled={ratingSaving[file.id]}
+                                  aria-pressed={Number(ratingInputs[file.id]) === value}
+                                  title={Number(ratingInputs[file.id]) === value ? `Click to remove your ${value}-star rating` : `Rate ${value} stars`}
+                                >
+                                  ★
+                                </button>
+                              ))}
+                            </div>
+                            {ratingErrors[file.id] && (
+                              <div className="admin-form-error">{ratingErrors[file.id]}</div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="file-rating">
-                      <div>
-                        <p className="info-label">Average rating</p>
-                        <p className="info-value">{averageValue !== null ? averageValue.toFixed(1) : '—'}</p>
-                      </div>
-                      <div>
-                        <p className="info-label">Ratings</p>
-                        <p className="info-value">{ratingCount}</p>
-                      </div>
-                      <div className="rating-actions">
-                        <p className="info-label">Your rating</p>
-                        <div className="rating-controls">
-                          {[1, 2, 3, 4, 5].map((value) => (
-                            <button
-                              key={value}
-                              type="button"
-                              className={`rating-star ${Number(ratingInputs[file.id]) >= value ? 'active' : ''}`}
-                              onClick={() => handleRatingChange(file.id, value)}
-                            >
-                              ★
-                            </button>
-                          ))}
-                          <button
-                            className="admin-btn"
-                            type="button"
-                            onClick={() => handleSaveRating(file.id)}
-                            disabled={ratingSaving[file.id]}
-                          >
-                            {ratingSaving[file.id] ? 'Saving...' : 'Save'}
-                          </button>
-                          <button
-                            className="admin-btn outline"
-                            type="button"
-                            onClick={() => handleRemoveRating(file.id)}
-                            disabled={ratingSaving[file.id]}
-                          >
-                            Remove
-                          </button>
-                        </div>
-                        {ratingErrors[file.id] && (
-                          <div className="admin-form-error">{ratingErrors[file.id]}</div>
-                        )}
-                      </div>
+                    <div className="file-actions">
+                      {(isAdmin || file.uploadedBy === userData?.id) && (
+                        <button
+                          className="admin-btn outline"
+                          type="button"
+                          onClick={() => handleDeleteFile(file.id)}
+                        >
+                          Delete
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
