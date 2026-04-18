@@ -15,7 +15,7 @@ A full-stack application for sharing course resources with authentication, enrol
 - frontend: React client application
 - docker-compose.yml: PostgreSQL and Redis services
 - start.sh: local startup helper script
-- QUICK_START.md: quick setup instructions
+- docs/start-guide.md: start guide
 - docs: detailed architecture and reference documentation
 
 ## Getting Started
@@ -41,7 +41,13 @@ Default local URLs:
 
 ## Documentation
 
+- Start Guide: docs/start-guide.md
 - Architecture: docs/architecture.md
+- Component and Connector View: docs/cc-view.md
+- Module View: docs/module-view.md
+- Allocation View: docs/allocation-view.md
+- Rationale: docs/rationale.md
+- Quality Attributes: docs/quality-attributes.md
 - Configuration and Environment Guide: docs/config-env-guide.md
 - API Reference: docs/api-reference.md
 
