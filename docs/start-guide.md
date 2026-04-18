@@ -25,6 +25,7 @@ This starts PostgreSQL and Redis.
 Run this from the backend folder:
 
 ```bash
+brew install maven
 cd backend
 ./mvnw spring-boot:run
 ```
@@ -32,6 +33,7 @@ cd backend
 On Windows, use:
 
 ```bash
+choco install maven
 cd backend
 .\mvnw.cmd spring-boot:run
 ```
