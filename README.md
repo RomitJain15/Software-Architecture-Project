@@ -18,21 +18,85 @@ A full-stack application for sharing course resources with authentication, enrol
 - docs/start-guide.md: start guide
 - docs: detailed architecture and reference documentation
 
-## Getting Started
+## Prerequisites
 
-1. Start infrastructure: docker-compose up -d
-2. Start backend from backend:
-	- Linux/macOS: ./mvnw spring-boot:run
-	- Windows: mvnw.cmd spring-boot:run
-3. Start frontend from frontend:
-	- npm install
-	- npm start
+- Docker Desktop installed and running
+- Java 17 or later
+- Node.js 18+ and npm
 
-Optional helper script:
+## Setup
 
-- ./start.sh starts Docker, backend, and frontend together (bash environments).
+1. Start the infrastructure services from the project root:
 
-Default local URLs:
+```bash
+docker compose up -d
+```
+
+2. Install frontend dependencies:
+
+```bash
+cd frontend
+npm install
+```
+
+3. Make sure backend configuration values are set as needed in `backend/src/main/resources/application.yml` or your environment.
+
+## Execution
+
+Run the application in three terminals.
+
+### Backend
+
+From the `backend` folder:
+
+```bash
+./mvnw spring-boot:run
+```
+
+On Windows:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+### Frontend
+
+From the `frontend` folder:
+
+```bash
+npm start
+```
+
+### Stop the app
+
+- Press `Ctrl+C` in the backend and frontend terminals.
+- Shut down the containers from the project root:
+
+```bash
+docker compose down
+```
+
+### Optional build checks
+
+- Frontend production build:
+
+```bash
+cd frontend
+npm run build
+```
+
+- Backend compile check:
+
+```bash
+cd backend
+./mvnw -q -DskipTests compile
+```
+
+## Optional Helper Script
+
+- `./start.sh` starts Docker, backend, and frontend together in bash environments.
+
+## Default Local URLs
 
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8080

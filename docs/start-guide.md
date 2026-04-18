@@ -33,7 +33,7 @@ On Windows, use:
 
 ```bash
 cd backend
-mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
 ### Terminal 3: Start the frontend
