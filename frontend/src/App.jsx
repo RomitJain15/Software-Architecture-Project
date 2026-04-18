@@ -158,9 +158,10 @@ function Dashboard({
     event.preventDefault();
     event.stopPropagation();
   };
-    const handleCardNavigation = (courseId) => {
-      navigate(`/courses/${courseId}`);
-    };
+  const handleCardNavigation = (courseId) => {
+    navigate(`/courses/${courseId}`);
+  };
+
   return (
     <div className="app">
       <div className={`app-shell ${isAdmin ? 'admin-theme' : 'student-theme'}`}>
@@ -179,7 +180,109 @@ function Dashboard({
             <button onClick={handleSignOut} className="ghost-btn">Sign Out</button>
           </div>
         </header>
+
         <main className="dashboard-page">
+          {isAdmin ? (
+            <section className="courses-section">
+              <div className="section-header">
+                <h2>📘 All Courses</h2>
+                <p className="section-subtitle">Manage and oversee every course</p>
+              </div>
+              <form className="admin-form" onSubmit={handleSaveCourse}>
+                <div className="admin-form-row">
+                  <label htmlFor="courseName">Course name</label>
+                  <input
+                    id="courseName"
+                    name="name"
+                    value={courseForm.name}
+                    onChange={handleCourseFormChange}
+                    placeholder="Software Architecture"
+                  />
+                </div>
+                <div className="admin-form-row">
+                  <label htmlFor="courseCode">Course code</label>
+                  <input
+                    id="courseCode"
+                    name="courseCode"
+                    value={courseForm.courseCode}
+                    onChange={handleCourseFormChange}
+                    placeholder="CS G653"
+                  />
+                </div>
+                <div className="admin-form-row">
+                  <label htmlFor="courseDescription">Description</label>
+                  <textarea
+                    id="courseDescription"
+                    name="description"
+                    value={courseForm.description}
+                    onChange={handleCourseFormChange}
+                    placeholder="Short course summary"
+                    rows="3"
+                  />
+                </div>
+                {courseActionError && <div className="admin-form-error">{courseActionError}</div>}
+                <div className="admin-form-actions">
+                  <button className="admin-btn" type="submit" disabled={courseActionLoading}>
+                    {courseActionLoading ? 'Saving...' : editingCourseId ? 'Update Course' : 'Create Course'}
+                  </button>
+                  <button className="admin-btn outline" type="button" onClick={resetCourseForm} disabled={courseActionLoading}>
+                    Clear
+                  </button>
+                </div>
+              </form>
+
+              {loadingCourses ? (
+                <div className="loading">Loading courses...</div>
+              ) : courses.length > 0 ? (
+                <div className="courses-grid">
+                  {courses.map((course) => (
+                    <div
+                      key={course.id}
+                      className="course-card course-card-link"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => handleCardNavigation(course.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          handleCardNavigation(course.id);
+                        }
+                      }}
+                    >
+                      <div className="course-header">
+                        <h3>{course.name}</h3>
+                        <span className="course-code">{course.courseCode}</span>
+                      </div>
+                      <p className="course-description">{course.description || 'No description'}</p>
+                      <div className="course-footer">
+                        <button
+                          className="admin-btn outline"
+                          onClick={(event) => {
+                            stopCardNavigation(event);
+                            handleEditCourse(course);
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="admin-btn"
+                          onClick={(event) => {
+                            stopCardNavigation(event);
+                            handleDeleteCourse(course.id);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <p>No courses found yet.</p>
+                </div>
+              )}
+            </section>
+          ) : (
             <section className="student-dashboard-layout">
               <div className="student-dashboard-main">
                 <section className="courses-section">
@@ -191,7 +294,7 @@ function Dashboard({
                     <div className="loading">Loading courses...</div>
                   ) : myEnrolledCourses.length > 0 ? (
                     <div className="courses-grid">
-                      {myEnrolledCourses.map(course => (
+                      {myEnrolledCourses.map((course) => (
                         <div
                           key={course.id}
                           className="course-card course-card-link"
@@ -241,7 +344,7 @@ function Dashboard({
                       <div className="loading">Loading courses...</div>
                     ) : availableCourses.length > 0 ? (
                       <div className="courses-grid">
-                        {availableCourses.map(course => (
+                        {availableCourses.map((course) => (
                           <div key={course.id} className="course-card">
                             <div className="course-header">
                               <h3>{course.name}</h3>
@@ -285,106 +388,6 @@ function Dashboard({
               </div>
             </section>
           )}
-            {isAdmin && (
-              <section className="courses-section">
-                <div className="section-header">
-                  <h2>📘 All Courses</h2>
-                  <p className="section-subtitle">Manage and oversee every course</p>
-                </div>
-                  <form className="admin-form" onSubmit={handleSaveCourse}>
-                    <div className="admin-form-row">
-                      <label htmlFor="courseName">Course name</label>
-                      <input
-                        id="courseName"
-                        name="name"
-                        value={courseForm.name}
-                        onChange={handleCourseFormChange}
-                        placeholder="Course title"
-                      />
-                    </div>
-                    <div className="admin-form-row">
-                      <label htmlFor="courseCode">Course code</label>
-                      <input
-                        id="courseCode"
-                        name="courseCode"
-                        value={courseForm.courseCode}
-                        onChange={handleCourseFormChange}
-                        placeholder="CODE101"
-                      />
-                    </div>
-                    <div className="admin-form-row">
-                      <label htmlFor="courseDescription">Description</label>
-                      <textarea
-                        id="courseDescription"
-                        name="description"
-                        value={courseForm.description}
-                        onChange={handleCourseFormChange}
-                        placeholder="Short course summary"
-                        rows="3"
-                      />
-                    </div>
-                    {courseActionError && <div className="admin-form-error">{courseActionError}</div>}
-                    <div className="admin-form-actions">
-                      <button className="admin-btn" type="submit" disabled={courseActionLoading}>
-                        {courseActionLoading ? 'Saving...' : editingCourseId ? 'Update Course' : 'Create Course'}
-                      </button>
-                      <button className="admin-btn outline" type="button" onClick={resetCourseForm} disabled={courseActionLoading}>
-                        Clear
-                      </button>
-                    </div>
-                  </form>
-                  {loadingCourses ? (
-                  <div className="loading">Loading courses...</div>
-                ) : courses.length > 0 ? (
-                  <div className="courses-grid">
-                    {courses.map(course => (
-                      <div
-                        key={course.id}
-                        className="course-card course-card-link"
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => handleCardNavigation(course.id)}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter' || event.key === ' ') {
-                            handleCardNavigation(course.id);
-                          }
-                        }}
-                      >
-                        <div className="course-header">
-                          <h3>{course.name}</h3>
-                          <span className="course-code">{course.courseCode}</span>
-                        </div>
-                        <p className="course-description">{course.description || 'No description'}</p>
-                        <div className="course-footer">
-                          <button
-                            className="admin-btn outline"
-                            onClick={(event) => {
-                              stopCardNavigation(event);
-                              handleEditCourse(course);
-                            }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="admin-btn"
-                            onClick={(event) => {
-                              stopCardNavigation(event);
-                              handleDeleteCourse(course.id);
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="empty-state">
-                    <p>No courses found yet.</p>
-                  </div>
-                )}
-              </section>
-            )}
         </main>
       </div>
     </div>
